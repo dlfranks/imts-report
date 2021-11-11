@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using API.Models.FieldConcreteTest;
 using API.Services;
 using API.Services.ConcreteService;
+using Application.Imts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,11 +16,16 @@ namespace API.Extentions
     {
         public static IServiceCollection ApplicationServices(this IServiceCollection services, IConfiguration config)
         {
+            
+           services.AddDbContext<ImtsContext>(opt =>
+            {
+                opt.UseSqlServer(config.GetConnectionString("ImtsContext"));
+            });
             services.AddDbContext<AppContext>(opt =>
            {
                opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
            });
-
+            
             services.AddCors(opt =>
             {
                 opt.AddPolicy("CorsPolicy", policy =>
@@ -33,7 +39,7 @@ namespace API.Extentions
             //     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             // });
 
-            //services.AddMediatR(typeof(List.Handler).Assembly);
+            services.AddMediatR(typeof(ProjectList.Handler).Assembly);
             //services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddHttpClient();
             services.AddScoped<IConcreteService, ConcreteService>();

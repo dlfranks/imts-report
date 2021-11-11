@@ -6,7 +6,7 @@ namespace Persistence
 {
     public class AppContext :IdentityDbContext<AppUser>
     {
-        public AppContext(DbContextOptions options) : base(options)
+        public AppContext(DbContextOptions<AppContext> options) : base(options)
         {
 
         }

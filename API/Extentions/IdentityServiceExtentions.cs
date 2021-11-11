@@ -22,6 +22,8 @@ namespace API.Extentions
             .AddEntityFrameworkStores<AppContext>()
             .AddSignInManager<SignInManager<AppUser>>();
 
+
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -36,9 +38,10 @@ namespace API.Extentions
                 };
             });
             services.AddScoped<TokenService>();
+            services.AddScoped<UserManager<AppUser>>();
 
             return services;
         }
-        
+
     }
 }
