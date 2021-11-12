@@ -19,6 +19,7 @@ namespace Persistence
                         FirstName = "Deana",
                         LastName = "Franks",
                         Email = "deana.franks@woodplc.com",
+                        UserName = "deana.franks@woodplc.com",
                         IsWoodEmployee = true,
                     },
                     new AppUser
@@ -26,6 +27,7 @@ namespace Persistence
                         FirstName = "Jane",
                         LastName = "Jane",
                         Email = "jane@test.com",
+                        UserName = "jane@test.com",
                         IsWoodEmployee = false,
                     },
 

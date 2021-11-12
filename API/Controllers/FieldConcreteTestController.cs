@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using API.Models.FieldConcreteTest;
 using API.Services;
 using API.Services.ConcreteService;
-using Application.Imts;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -36,8 +36,8 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> ProjectAutoComplete()
         {
-            var result = await Mediator.Send(new ProjectList.Query());
-            return Ok(result);
+            //var result = await Mediator.Send(new ProjectList.Query());
+            return Ok();
         }
     }
 
