@@ -16,16 +16,16 @@ namespace API.Extentions
     {
         public static IServiceCollection ApplicationServices(this IServiceCollection services, IConfiguration config)
         {
-            
-        //    services.AddDbContext<ImtsContext>(opt =>
-        //     {
-        //         opt.UseSqlServer(config.GetConnectionString("ImtsContext"));
-        //     });
+
+            services.AddDbContext<ImtsContext>(opt =>
+             {
+                 opt.UseSqlServer(config.GetConnectionString("ImtsContext"));
+             });
             services.AddDbContext<AppContext>(opt =>
            {
                opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
            });
-            
+
             services.AddCors(opt =>
             {
                 opt.AddPolicy("CorsPolicy", policy =>

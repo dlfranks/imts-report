@@ -5,6 +5,8 @@ using API.Services;
 using API.Services.ConcreteService;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Persistence;
 
 namespace API.Controllers
 {
@@ -13,9 +15,11 @@ namespace API.Controllers
     {
         private readonly IConcreteService concreteService;
         private readonly string baseUrl = "http://localhost:6777/ReportService/FieldConcreteJsonData";
+        private readonly ImtsContext _imtsContext;
 
-        public FieldConcreteTestController(IConcreteService concreteService)
+        public FieldConcreteTestController(IConcreteService concreteService, ImtsContext imtsContext)
         {
+            _imtsContext = imtsContext;
             this.concreteService = concreteService;
         }
 
@@ -33,11 +37,13 @@ namespace API.Controllers
             return HandleResult(result);
         }
 
-        [HttpGet]
+        [Route("project")]
+        [HttpPost]
         public async Task<IActionResult> ProjectAutoComplete()
         {
+            var result = await _imtsContext.Projects.Include("office").ToListAsync();
             //var result = await Mediator.Send(new ProjectList.Query());
-            return Ok();
+            return Ok(result);
         }
     }
 

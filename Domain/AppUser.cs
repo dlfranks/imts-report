@@ -8,10 +8,7 @@ namespace Domain
         public string LastName { get; set; }
         public bool IsWoodEmployee { get; set; }
 
-        public string DisplayName ()
-        {
-            return FirstName + " " + LastName;
-        }
+        
 
     }
 }
