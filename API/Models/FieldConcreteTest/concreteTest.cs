@@ -3,47 +3,34 @@ using System.Collections.Generic;
 
 namespace API.Models.FieldConcreteTest
 {
-    public class FieldConcreteSpecimenRowJsonDataset
-    { 
-        public int id { get; set; }
-        
-        public double? receivedAirWeight { get; set; }
-        
-        public double? ovenDriedSpecimen { get; set; }
-        
-        public double? surfaceDriedAirImmersion { get; set; }
-        
-        public double? surfaceDriedAirImmersionBoiling { get; set; }
-        
-        public double? specimenWaterImmersionBoiling { get; set; }
-        
-        public double? specimenReachingEquilibrium { get; set; }
+    public enum FieldConcreteDatasetEnum
+    {
+        Full = 1,
+        Strength,
+        MixNumber,
+
     }
-    public class FieldConcreteTestAttachmentJsonDataset
+    public class FieldConcreteDatumAttachmentDataset
     {
         public string originalFilename { get; set; }
         public string officeAssetFileName { get; set; }
 
     }
-    public class FieldConcreteStrengthRowJsonDataset
+    public class FieldConcreteDatumStrengthRowDataset
     {
         public double strength { get; set; }
         public int days { get; set; }
         public string displayStrengthType { get; set; }
     }
-    public class FieldConcreteBatchRowJsonDataset 
+    public class FieldConcreteDatumBatchRowDataset
     {
         public string name { get; set; }
         public double weight { get; set; }
         public double moisture { get; set; }
-        
+
     }
-    public class FieldConcreteTestRowJsonDataset
+    public class FieldConcreteDatumTestRowDataset
     {
-        public FieldConcreteTestRowJsonDataset()
-        {
-            specimenRows = new List<FieldConcreteSpecimenRowJsonDataset>();
-        }
         public int id { get; set; }
         public string specimenId { get; set; }
         public int daysToAge { get; set; }
@@ -90,28 +77,17 @@ namespace API.Models.FieldConcreteTest
         public double? calcDensityImmersion { get; set; }
         public double? calcDensityImmersionBoiling { get; set; }
         public double? calcVolumePermeablePore { get; set; }
-        public List<FieldConcreteSpecimenRowJsonDataset> specimenRows { get; set; }
+
     }
-    public class FieldConcreteTestSpecimenStrengthRowJsonDataset
+
+    public class FieldConcreteDatumDataset
     {
-        public string specimenId { get; set; }
-        public int daysToAge { get; set; }
-        public DateTime? testedOnDate { get; set; }
-        public double widthDiameter { get; set; }
-        public double heightLength { get; set; }
-        public double? testLoad { get; set; }
-        public double? calcArea { get; set; }
-        public double? calcCompressiveStrength { get; set; }
-        public double? calcCompressiveStrengthUnrounded { get; set; }
-    }
-    public class FieldConcreteTestDatumBaseJsonDataset
-    {
-        public FieldConcreteTestDatumBaseJsonDataset()
+        public FieldConcreteDatumDataset()
         {
-            this.batchRows = new List<FieldConcreteBatchRowJsonDataset>();
-            this.strengthRows = new List<FieldConcreteStrengthRowJsonDataset>();
-            this.attachments = new List<FieldConcreteTestAttachmentJsonDataset>();
-            this.testRows = new List<FieldConcreteTestRowJsonDataset>();
+            this.batchRows = new List<FieldConcreteDatumBatchRowDataset>();
+            this.strengthRows = new List<FieldConcreteDatumStrengthRowDataset>();
+            this.attachments = new List<FieldConcreteDatumAttachmentDataset>();
+            this.testRows = new List<FieldConcreteDatumTestRowDataset>();
         }
         //testSubTypes based on region, ie CSA or ASTM/AAHSTO depends on officeRegion, gram weight of specimens is only CSA
         //----Sample-------------------------------------
@@ -134,7 +110,7 @@ namespace API.Models.FieldConcreteTest
         public DateTime? displayCreatedAuditDate { get; set; }
         public string displayLastUpdatedAuditName { get; set; }
         public DateTime? displayLastUpdatedAuditDate { get; set; }
-        
+
         //-----Project---------------------------------------------
         public string displayOfficeName { get; set; }
         public string displayAddress { get; set; }
@@ -143,7 +119,7 @@ namespace API.Models.FieldConcreteTest
         public string displayProjectManaer { get; set; }
         public bool DisplayIsEngineerSignatureRequired { get; set; }
         //Client and client contact
-        public string displayClientName {get; set;}
+        public string displayClientName { get; set; }
         //Contractor
         public string displayContractorName { get; set; }
         //Supplier
@@ -232,7 +208,7 @@ namespace API.Models.FieldConcreteTest
         public string truckDischarge { get; set; }
         public string sampledFrom { get; set; }
         public string clientNotification { get; set; }
-        
+
         //Batch Data
         public double? cementQuantity { get; set; }
         public double? flyAshQuantity { get; set; }
@@ -250,16 +226,16 @@ namespace API.Models.FieldConcreteTest
         public double? calcTotalHours { get; set; }
         public double? mileage { get; set; }
         //Lists
-        public virtual List<FieldConcreteBatchRowJsonDataset> batchRows { get; set; }
+        public virtual List<FieldConcreteDatumBatchRowDataset> batchRows { get; set; }
         //Strengths
-        public virtual List<FieldConcreteStrengthRowJsonDataset> strengthRows { get; set; }
+        public virtual List<FieldConcreteDatumStrengthRowDataset> strengthRows { get; set; }
         //Attachments
-        public virtual List<FieldConcreteTestAttachmentJsonDataset> attachments { get; set; }
+        public virtual List<FieldConcreteDatumAttachmentDataset> attachments { get; set; }
         //Specimens
-        public virtual List<FieldConcreteTestRowJsonDataset> testRows { get; set; }
+        public virtual List<FieldConcreteDatumTestRowDataset> testRows { get; set; }
     }
 
-    public class FieldConcreteTestFlattenJsonDataset
+    public class FieldConcreteDatumFlattenDataset
     {
         //----Sample-------------------------------------
         public string displayLabNo { get; set; }
@@ -399,14 +375,14 @@ namespace API.Models.FieldConcreteTest
         public double strengthRow_strength_0 { get; set; }
         public int strengthRow_days_0 { get; set; }
         public string strengthRow_strengthType_0 { get; set; }
-        public virtual List<FieldConcreteTestRowJsonDataset> testRows { get; set; }
+        public virtual List<FieldConcreteDatumTestRowDataset> testRows { get; set; }
     }
 
-    public class FieldConcreteTestSpecimenStrengthJsonDataset
+    public class FieldConcreteStrengthDataset
     {
-        public FieldConcreteTestSpecimenStrengthJsonDataset()
+        public FieldConcreteStrengthDataset()
         {
-            testRows = new List<FieldConcreteTestSpecimenStrengthRowJsonDataset>();
+            testRows = new List<FieldConcreteStrengthRowDataset>();
         }
         public string displayProjectNo { get; set; }
         public string displayProjectName { get; set; }
@@ -420,6 +396,53 @@ namespace API.Models.FieldConcreteTest
         public double? displayUwAirActual { get; set; }
         public double? displayUwWeightActual { get; set; }
         public double? displayUwConcreteTempActual { get; set; }
-        public List<FieldConcreteTestSpecimenStrengthRowJsonDataset> testRows { get; set; }
+        public List<FieldConcreteStrengthRowDataset> testRows { get; set; }
     }
+    //public class FieldConcreteSpecimenRowDataset
+    //{
+    //    public int id { get; set; }
+
+    //    public double? receivedAirWeight { get; set; }
+
+    //    public double? ovenDriedSpecimen { get; set; }
+
+    //    public double? surfaceDriedAirImmersion { get; set; }
+
+    //    public double? surfaceDriedAirImmersionBoiling { get; set; }
+
+    //    public double? specimenWaterImmersionBoiling { get; set; }
+
+    //    public double? specimenReachingEquilibrium { get; set; }
+    //}
+    public class FieldConcreteStrengthRowDataset
+    {
+        public string specimenId { get; set; }
+        public int daysToAge { get; set; }
+        public DateTime? testedOnDate { get; set; }
+        public double widthDiameter { get; set; }
+        public double heightLength { get; set; }
+        public double? testLoad { get; set; }
+        public double? calcArea { get; set; }
+        public double? calcCompressiveStrength { get; set; }
+        public double? calcCompressiveStrengthUnrounded { get; set; }
+    }
+    public class FieldConcreteMixNumberDataset
+    {
+        public FieldConcreteMixNumberDataset()
+        {
+            TestRows = new List<FieldConcreteMixNumberRowDataset>();
+        }
+        public string ProjectName { get; set; }
+        public string LabNo { get; set; }
+        public DateTime? CastDate { get; set; }
+        public string MixNumber { get; set; }
+        public List<FieldConcreteMixNumberRowDataset> TestRows { get; set; }
+    }
+
+    public class FieldConcreteMixNumberRowDataset
+    {
+        public string SpecimenId { get; set; }
+        public int DaysToAge { get; set; }
+    }
+
 }

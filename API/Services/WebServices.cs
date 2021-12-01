@@ -36,17 +36,17 @@ namespace API.Services
             var response = await _client.SendAsync(request);
             JsonSerializerOptions options = new JsonSerializerOptions()
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                
             };
 
-            // options.Converters.Add(new CustomJsonConverterForNullableDateTime(options));
+            
             options.Converters.Add(new TimeSpanToStringConverter());
 
             
 
             if (response.IsSuccessStatusCode)
             {
-                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var responseStream = await response.Content.ReadAsStreamAsync();
                 data = await JsonSerializer.DeserializeAsync<T>(responseStream, options);
             }
             
@@ -54,37 +54,6 @@ namespace API.Services
         }
 
 
-    }
-
-    public class CustomJsonConverterForNullableDateTime : JsonConverter<DateTime?>
-    {
-        protected JsonSerializerOptions options;
-        public CustomJsonConverterForNullableDateTime(JsonSerializerOptions options)
-        {
-            this.options = options;
-        }
-        public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            Console.WriteLine("Reading");
-            Debug.Assert(typeToConvert == typeof(DateTime?));
-            return reader.GetString() == "" ? null : reader.GetDateTime();
-        }
-
-        // This method will be ignored on serialization, and the default typeof(DateTime) converter is used instead.
-        // This is a bug: https://github.com/dotnet/corefx/issues/41070#issuecomment-560949493
-        public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
-        {
-            Console.WriteLine("Here - writing");
-
-            if (!value.HasValue)
-            {
-                writer.WriteStringValue("");
-            }
-            else
-            {
-                writer.WriteStringValue(value.Value);
-            }
-        }
     }
 
     public class TimeSpanToStringConverter : JsonConverter<TimeSpan>

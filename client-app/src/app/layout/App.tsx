@@ -1,7 +1,9 @@
 import React from 'react';
-import { Header, List } from 'semantic-ui-react';
-import DataDashboard from '../../features/DataDashboard/ReportDashboard';
+import { Container, Header, List } from 'semantic-ui-react';
+import DataDashboard from '../../features/DataDashboard/DataDashboard';
+import TestList from '../../features/DataDashboard/TestList';
 import ModalContainer from '../common/modals/ModalContainer';
+import NavBar from './NavBar';
 
 
 function App() {
@@ -9,8 +11,12 @@ function App() {
     <>
       <ModalContainer/>
       <div className="App">
-        <Header as='h2' icon='users' content='Imts Data Portal' />
-        <DataDashboard/>
+        <NavBar />
+        <Container style={{marginTop: '7em'}}>
+          <DataDashboard />
+          
+        </Container>
+        
         
         </div>
       </>

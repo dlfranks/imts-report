@@ -42,7 +42,9 @@ namespace API.Extentions
             //services.AddMediatR(typeof(ProjectList.Handler).Assembly);
             //services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddHttpClient();
-            services.AddScoped<IConcreteService, ConcreteService>();
+            services.AddScoped<IConnectionService, ConnectionService>();
+            services.AddScoped<ConcreteService>();
+            
             services.AddMvc().AddNewtonsoftJson();
             return services;
         }

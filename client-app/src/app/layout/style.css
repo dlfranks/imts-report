@@ -1,0 +1,16 @@
+body {
+  background-color: #eaeaea !important;
+  font-family: Lato, "Helvetica Neue", Arial, Helvetica, sans-serif;
+  color: rgba(0, 0, 0, 87);
+}
+.container_table {
+  width: 100%;
+  overflow: auto; /* or auto */
+}
+.container_table table {
+  width: 100%;
+}
+.api_popup {
+  
+  width: 600px;
+}

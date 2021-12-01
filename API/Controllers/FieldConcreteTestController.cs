@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Models.FieldConcreteTest;
@@ -13,38 +14,61 @@ namespace API.Controllers
 
     public class FieldConcreteTestController : BaseApiController
     {
-        private readonly IConcreteService concreteService;
-        private readonly string baseUrl = "http://localhost:6777/ReportService/FieldConcreteJsonData";
-        private readonly ImtsContext _imtsContext;
+        private readonly IConnectionService _connectionService;
+        
 
-        public FieldConcreteTestController(IConcreteService concreteService, ImtsContext imtsContext)
+        private readonly ConcreteService _concreteService;
+
+        public FieldConcreteTestController(IConnectionService connectionService, ConcreteService concreteService)
         {
-            _imtsContext = imtsContext;
-            this.concreteService = concreteService;
+            _concreteService = concreteService;
+
+            _connectionService = connectionService;
         }
 
-        [Route("datum")]
+        [Route("json")]
         [HttpGet]
-        public async Task<IActionResult> GetConcreteJsonDatum(int projectId)
+        public async Task<IActionResult> GetConcreteJsonDatum(int projectId, int dataset)
         {
-            projectId = 6754;
-            int format = 2;
 
-            string url = $"{baseUrl}?projectId={projectId}&format={format}";
+            FieldConcreteDatasetEnum dSet = (FieldConcreteDatasetEnum)dataset;
+            string url = _concreteService.getUrl(projectId, dataset);
 
-            var result = await concreteService.concreteDatumJson.OnGetData(url);
-
-            return HandleResult(result);
+            if (dSet == FieldConcreteDatasetEnum.Full)
+                return HandleResult(await _connectionService.concreteDatumData.OnGetData(url));
+            else if (dSet == FieldConcreteDatasetEnum.Strength)
+                return HandleResult(await _connectionService.concreteStrengthData.OnGetData(url));
+            else if (dSet == FieldConcreteDatasetEnum.MixNumber)
+                return HandleResult(await _connectionService.concreteMixNumberData.OnGetData(url));
+            else
+                return NotFound();
         }
 
-        [Route("project")]
-        [HttpPost]
-        public async Task<IActionResult> ProjectAutoComplete()
+        [Route("excel")]
+        [HttpGet]
+        public async Task<IActionResult> DownloadExcel(int projectId, int dataset)
         {
-            var result = await _imtsContext.Projects.Include("office").ToListAsync();
-            //var result = await Mediator.Send(new ProjectList.Query());
-            return Ok(result);
+            FieldConcreteDatasetEnum dSet = (FieldConcreteDatasetEnum)dataset;
+            string url = _concreteService.getUrl(projectId, dataset);
+
+            byte[] ray = await _concreteService.createExcel(projectId, dataset);
+            var date = DateTime.Now;
+            var dateString = date.Month.ToString() + "-" + date.Day.ToString() + "-" + date.Year.ToString();
+            string fileName = "concreteData-" + dateString;
+
+            return this.File(
+            fileContents: ray,
+            contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+            // By setting a file download name the framework will
+            // automatically add the attachment Content-Disposition header
+            fileDownloadName: fileName + ".xlsx"
+        );
         }
+
+
+
+
     }
 
 

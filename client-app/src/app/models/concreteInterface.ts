@@ -3,5 +3,12 @@ import internal from "stream";
 
 export interface ConcreteParam {
     projectId: number;
-    fomat: number;
+    dataset: number;
+    format: string;
+}
+
+
+
+export interface FieldConcreteTestDatum {
+    
 }
