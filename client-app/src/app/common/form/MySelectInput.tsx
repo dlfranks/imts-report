@@ -7,7 +7,7 @@ interface Props {
     name: string;
     options: any;
     label?: string;
-
+    onChange: () => void;
 }
 
 export default function MySelectInput(props: Props) {

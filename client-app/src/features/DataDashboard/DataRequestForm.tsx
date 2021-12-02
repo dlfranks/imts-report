@@ -1,7 +1,7 @@
 
 import { Formik } from "formik";
-import React, { useState, useEffect } from "react";
-import { Button, Form, Grid, Header, Label, Popup, Segment, Select} from "semantic-ui-react";
+import React, { useState, useEffect, ChangeEvent, SyntheticEvent } from "react";
+import { Button, Form, Grid, Header, Label, Popup, Segment, Select, Dropdown, DropdownProps } from 'semantic-ui-react';
 import * as Yup from 'yup';
 import { DatasetOptions } from '../../app/common/options/formOptions';
 
@@ -11,15 +11,9 @@ import { useStore } from "../../app/stores/store";
 import MySelectInput from '../../app/common/form/MySelectInput';
 import { Autocomplete } from "@material-ui/lab";
 import { TextField } from "@material-ui/core";
+import { ConcreteParam } from '../../app/models/concreteInterface';
 
 
-interface ConcreteDataParam {
-    projectId: number | undefined;
-    dataset: number;
-}
-
-
-  
 export default function DataRequestForm()
 {
     
@@ -30,28 +24,30 @@ export default function DataRequestForm()
         
     });
 
-    const { projectStore } = useStore();
-    const { projects, loadProjects, loadingInitial } = projectStore;
-    //const { officeId } = useParams<{ officeId: string }>();
-    const [formParams, setFormParams] = useState<ConcreteDataParam>({projectId: 0, dataset: 1});
-    //const [options, setOptions] = useState<Project[] | undefined>(Project[]);
+    const { projectStore, concreteStore } = useStore();
+    const { projects, loadProjects } = projectStore;
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  
+    const { concreteApiUrl } = concreteStore;
+
+    const [formParams, setFormParams] = useState<ConcreteParam>({projectId: 0, dataset: 1, format:''});
+    
+    
+    
     const [term, setTerm] = useState<string>('');
     
     
     
-    function handleFormSubmit(formParams: ConcreteDataParam) {
-        if (selectedProject)
-            setFormParams({ ...formParams });
+    function handleJson(formParams: ConcreteParam) {
         
+        concreteStore.download(formParams);
     }
-    function requestUrl(): string {
-        return `http://localhost:5000/api/FieldConcreteTest/datum?projectId=${formParams.projectId}&dataset=${formParams.dataset}`;
+    const handleDataSetChange = (event: SyntheticEvent<HTMLElement | Event>, data:DropdownProps ) => {
+
+        const { name, value } = data;
+        
+        setFormParams({...formParams, [name]:value })
     }
-    function excelDownload() {
-        return `http://localhost:5000/api/FieldConcreteTest/excel?projectId=${formParams.projectId}&dataset=${formParams.dataset}`;
-    }
+    
     useEffect(() => {
         loadProjects().then(() => {
 
@@ -59,16 +55,7 @@ export default function DataRequestForm()
     }, [loadProjects]);
 
     return (
-        <Segment clearing>
-                <Formik 
-                    initialValues={formParams}
-                    onSubmit={values => {handleFormSubmit(values)}}
-            >
-                {
-                    
-                    ({ handleSubmit, isSubmitting, values, setFieldValue, setValues }) => (
-                        
-                        <form onSubmit={handleSubmit} autoComplete='off'>
+        <form autoComplete='off'>
                             
                             <Grid columns={2}>
                                 <Grid.Row>
@@ -82,26 +69,12 @@ export default function DataRequestForm()
                                                 options={projects}
                                                 getOptionLabel={option => option.name}
                                                 value={selectedProject}
-                                                
-                                                // getOptionSelected={(option, value) => {
-                                                    
-                                                //     return option.id === value.id
-                                                    
-                                                // }}
-                                                // renderOption={(option: Project) => (
-                                                // <Box display="flex" flexDirection="row" alignItems="center">
-                                                    
-                                                //     <Box>
-                                                //     <Typography variant="body2">{option.name}</Typography>
-                                                //     </Box>
-                                                // </Box>
-                                                // )}
-                                                onChange={(e: object, value: any | null) => {
+                                                onChange={(e: object, value: Project | null) => {
                                                     if (value) {
-                                                        console.log('do the types match?', typeof value.id === typeof values.projectId);
+                                                        console.log('do the types match?', typeof value.id === typeof formParams.projectId);
                                                     
                                                         setSelectedProject(value);
-                                                        setFieldValue("projectId", value.id);
+                                                        setFormParams({...formParams, projectId: value.id});
                                                     }
                                                     
                                                 }}
@@ -117,19 +90,20 @@ export default function DataRequestForm()
                                                 />
                                                )}
                                             />
-                                            <pre>{ JSON.stringify(values, null, 2)}</pre>
+                                            <pre>{ JSON.stringify(formParams, null, 2)}</pre>
                                         
                                     </Grid.Column>
-                                    <Grid.Column>
-                                                
-                                            <MySelectInput
-                                                name='dataset'
-                                                label='Dataset'
-                                                options={DatasetOptions}
-                                                placeholder='Dataset'
-                                            />
-                                        
-                                        
+                    <Grid.Column>
+                        <Form.Field>
+                            <label>Data set</label>
+                            <Form.Select style={{marginTop:'7px', display:'block'}} placeholder='DataSet' value={formParams.dataset} name={'dataset'} onChange={handleDataSetChange} options={ DatasetOptions}/>
+                            
+                        
+                        </Form.Field>
+                        
+                        
+                        
+                                            
                                     </Grid.Column>
                                 </Grid.Row>
                                 <Grid.Row>
@@ -148,7 +122,7 @@ export default function DataRequestForm()
                                                             value={`http://localhost:5000/api/FieldConcreteTest/datum?projectId=${formParams.projectId}&dataset=${formParams.dataset}`}
                                                         /></div>
                                                         <button className="ui button" onClick={() =>
-                                                            navigator.clipboard.writeText(requestUrl())}
+                                                            navigator.clipboard.writeText("")}
                                                         >Copy</button>
                                                     </div>
                                                     <div style={{clear:'both', marginBottom:'1em'}}>
@@ -157,7 +131,7 @@ export default function DataRequestForm()
                                                             value={`http://localhost:5000/api/FieldConcreteTest/datum?projectId=${formParams.projectId}&dataset=${formParams.dataset}`}
                                                         /></div>
                                                         <button className="ui button" onClick={() =>
-                                                            navigator.clipboard.writeText(requestUrl())}
+                                                            navigator.clipboard.writeText("")}
                                                         >Copy</button>
                                                     </div>
                                                     
@@ -167,7 +141,7 @@ export default function DataRequestForm()
                                             positionFixed
                                             trigger={<Button>API</Button>}
                                         />
-                                        <Button color='teal'>Json</Button>
+                                        <Button color='teal' OnClick={handleJson}>Json</Button>
                                         <Button color='teal' content='Excel' />
                                         <Button color='teal' content='XML'/>
                                     </Grid.Column>
@@ -184,10 +158,5 @@ export default function DataRequestForm()
                             
                             
                         </form>
-                    )
-                }
-
-                </Formik>
-        </Segment>
     )
 }
