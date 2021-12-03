@@ -37,9 +37,17 @@ export default function DataRequestForm()
     
     
     
-    function handleJson(formParams: ConcreteParam) {
+    function handleJson() {
         
-        concreteStore.download(formParams);
+        concreteStore.downloadJson(formParams);
+    }
+    function handleXml() {
+        
+        concreteStore.downloadXml(formParams);
+    }
+    function handleExcel() {
+        
+        concreteStore.downloadExcel(formParams);
     }
     const handleDataSetChange = (event: SyntheticEvent<HTMLElement | Event>, data:DropdownProps ) => {
 
@@ -55,7 +63,7 @@ export default function DataRequestForm()
     }, [loadProjects]);
 
     return (
-        <form autoComplete='off'>
+        <div>
                             
                             <Grid columns={2}>
                                 <Grid.Row>
@@ -141,9 +149,9 @@ export default function DataRequestForm()
                                             positionFixed
                                             trigger={<Button>API</Button>}
                                         />
-                                        <Button color='teal' OnClick={handleJson}>Json</Button>
-                                        <Button color='teal' content='Excel' />
-                                        <Button color='teal' content='XML'/>
+                                        <Button color='teal' onClick={handleJson}>Json</Button>
+                                        <Button color='teal' content='Excel' onClick={handleExcel}/>
+                                        <Button color='teal' content='XML' onClick={handleXml }/>
                                     </Grid.Column>
                                 </Grid.Row>
                                 
@@ -157,6 +165,6 @@ export default function DataRequestForm()
                             
                             
                             
-                        </form>
+                        </div>
     )
 }

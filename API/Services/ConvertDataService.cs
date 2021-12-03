@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 using OfficeOpenXml;
 
 namespace API.Services
@@ -41,7 +42,7 @@ namespace API.Services
                 var copyRow = table.NewRow();
 
                 int valueCount = 0;
-                
+
                 for (int i = 0; i < props.Count; i++)
                 {
                     PropertyDescriptor prop = props[i];
@@ -56,11 +57,11 @@ namespace API.Services
                             int tRowCount = 0;
                             foreach (var r in tRows)
                             {
-                                if(tRowCount != 0)
+                                if (tRowCount != 0)
                                 {
                                     var cloneRow = table.NewRow();
                                     cloneRow.ItemArray = copyRow.ItemArray;
-                                    
+
                                     for (int j = 0; j < rowProps.Count; j++)
                                     {
                                         PropertyDescriptor rProp = rowProps[j];
@@ -69,7 +70,7 @@ namespace API.Services
                                         valueCount++;
                                     }
                                     table.Rows.Add(cloneRow);
-                                    
+
                                 }
                                 else
                                 {
@@ -82,7 +83,7 @@ namespace API.Services
                                     }
                                     table.Rows.Add(actualRow);
                                 }
-                                    tRowCount++;
+                                tRowCount++;
                             }
                         }
                         else
@@ -104,7 +105,8 @@ namespace API.Services
         public static Byte[] FromTableToExcel(DataTable table)
         {
             MemoryStream memoryStream = new MemoryStream();
-            using(ExcelPackage package = new ExcelPackage(memoryStream)){
+            using (ExcelPackage package = new ExcelPackage(memoryStream))
+            {
                 ExcelWorksheet ws = package.Workbook.Worksheets.Add("Concrete");
                 ws.Cells.LoadFromDataTable(table, true);
                 var dPos = new List<int>();
@@ -117,10 +119,35 @@ namespace API.Services
                 }
                 package.Save();
             }
-            
+
             return memoryStream.ToArray();
         }
 
-        
+        public static byte[] FromListToXml<T>(List<T> data)
+        {
+            //const string xmlFilename = "FitTClassics.xml";
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<T>));
+            MemoryStream writer = new MemoryStream();
+            //var file = new StreamWriter(xmlFilename);
+
+            //xmlSerializer.Serialize(file, data);
+            xmlSerializer.Serialize(writer, data);
+            return writer.ToArray();
+
+
+
+        }
+
+        public static void SerializeToXml<T>(T anyobject, string xmlFilePath)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(anyobject.GetType());
+
+            using (StreamWriter writer = new StreamWriter(xmlFilePath))
+            {
+                xmlSerializer.Serialize(writer, anyobject);
+            }
+        }
+
+
     }
 }

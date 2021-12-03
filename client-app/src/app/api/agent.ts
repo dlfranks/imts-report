@@ -32,8 +32,10 @@ const Projects = {
 }
 
 const Concrete = {
-    json: (params:ConcreteParam) => requests.download(`/FieldConcrteTest/json?projectId=${params.projectId}&dataset=${params.dataset}&format=${params.format}`),
-    excel: (params:ConcreteParam) => requests.download(`/FieldConcrteTest/excel?projectId=${params.projectId}&dataset=${params.dataset}&format=${params.format}`),
+    json: (params: ConcreteParam) => {
+        requests.download(`/FieldConcrteTest/json?projectId=${params.projectId}&dataset=${params.dataset}&format=${params.format}`);
+    },
+    
     
 }
 
