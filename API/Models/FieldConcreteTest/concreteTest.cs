@@ -10,6 +10,16 @@ namespace API.Models.FieldConcreteTest
         MixNumber,
 
     }
+    public class FieldConcreteSampleDataset{
+        public FieldConcreteSampleDataset(){
+            fullDataset = new List<FieldConcreteDatumFlattenDataset>();
+            strengthDataset = new List<FieldConcreteStrengthDataset>();
+            mixNumberDataset = new List<FieldConcreteMixNumberDataset>();
+        }
+        public List<FieldConcreteDatumFlattenDataset> fullDataset { get; set; }
+        public List<FieldConcreteStrengthDataset> strengthDataset { get; set; }
+        public List<FieldConcreteMixNumberDataset> mixNumberDataset { get; set; }
+    }
     public class FieldConcreteDatumAttachmentDataset
     {
         public string originalFilename { get; set; }

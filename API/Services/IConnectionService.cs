@@ -12,7 +12,7 @@ namespace API.Services
         IWebService<List<FieldConcreteStrengthDataset>> concreteStrengthData { get; }
         IWebService<List<FieldConcreteMixNumberDataset>> concreteMixNumberData { get; }
 
-        
+        T getConcreteData<T>(int dataset);
 
     }
 }

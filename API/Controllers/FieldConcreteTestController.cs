@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
+using API.Models.Core;
 using API.Models.FieldConcreteTest;
 using API.Services;
 using API.Services.ConcreteService;
-
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace API.Controllers
 {
@@ -18,15 +14,39 @@ namespace API.Controllers
     public class FieldConcreteTestController : BaseApiController
     {
         private readonly IConnectionService _connectionService;
-
-
         private readonly ConcreteService _concreteService;
-
         public FieldConcreteTestController(IConnectionService connectionService, ConcreteService concreteService)
         {
             _concreteService = concreteService;
-
             _connectionService = connectionService;
+        }
+
+        [Route("sampleDatasets")]
+        [HttpGet]
+        public async Task<IActionResult> sampleDatasets()
+        {
+            int projectId = 6754;
+            int length = Enum.GetNames(typeof(FieldConcreteDatasetEnum)).Length;
+
+            for (int i = 0; i < length; i++){
+                int dataset = i + 1;
+                 FieldConcreteDatasetEnum dSet = (FieldConcreteDatasetEnum)dataset;
+                 string url = _concreteService.getUrl(projectId, dataset);
+            }
+               
+            
+
+            byte[] ray = await _concreteService.createExcel(projectId, dataset);
+            var date = DateTime.Now;
+            var dateString = date.Month.ToString() + "-" + date.Day.ToString() + "-" + date.Year.ToString();
+            string fileName = "concreteDataExcel-" + dateString;
+
+            return File(
+            fileContents: ray,
+            contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+            fileDownloadName: fileName + ".xlsx"
+            );
         }
 
         [Route("json")]
@@ -63,8 +83,6 @@ namespace API.Controllers
             fileContents: ray,
             contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 
-            // By setting a file download name the framework will
-            // automatically add the attachment Content-Disposition header
             fileDownloadName: fileName + ".xlsx"
             );
         }
@@ -75,28 +93,18 @@ namespace API.Controllers
             FieldConcreteDatasetEnum dSet = (FieldConcreteDatasetEnum)dataset;
             string url = _concreteService.getUrl(projectId, dataset);
 
-            dynamic ray = null;
+
+
+            //var data = await _connectionService.concreteDatumData.OnGetData(url);
 
             if (dSet == FieldConcreteDatasetEnum.Full)
-                ray = await _connectionService.concreteDatumData.OnGetData(url);
+                return HandleJsonResult(await _connectionService.concreteDatumData.OnGetData(url));
             else if (dSet == FieldConcreteDatasetEnum.Strength)
-                ray = await _connectionService.concreteStrengthData.OnGetData(url);
+                return HandleJsonResult(await _connectionService.concreteStrengthData.OnGetData(url));
             else if (dSet == FieldConcreteDatasetEnum.MixNumber)
-                ray = await _connectionService.concreteMixNumberData.OnGetData(url);
+                return HandleJsonResult(await _connectionService.concreteMixNumberData.OnGetData(url));
             else
                 return NotFound();
-
-
-            string jsonString = JsonSerializer.Serialize(ray);
-            var date = DateTime.Now;
-            var dateString = date.Month.ToString() + "-" + date.Day.ToString() + "-" + date.Year.ToString();
-            string fileName = "concreteDataJson-" + dateString;
-
-            HttpContext.Response.Headers.Add("Content-Type", "application/json; charset=utf-8");
-            HttpContext.Response.Headers.Add("content-disposition", "attachment; filename=" + fileName + ".json");
-            return new JsonResult(ray
-
-        );
         }
 
         [HttpGet]
@@ -112,42 +120,25 @@ namespace API.Controllers
             {
                 var result = await _connectionService.concreteDatumData.OnGetData(url);
                 ray = ConvertDataService.FromListToXml<FieldConcreteDatumDataset>(result.Value);
-            }else if (dSet == FieldConcreteDatasetEnum.Strength)
+            }
+            else if (dSet == FieldConcreteDatasetEnum.Strength)
             {
-                var result =  await _connectionService.concreteStrengthData.OnGetData(url);
+                var result = await _connectionService.concreteStrengthData.OnGetData(url);
                 ray = ConvertDataService.FromListToXml<FieldConcreteStrengthDataset>(result.Value);
-            }else if (dSet == FieldConcreteDatasetEnum.MixNumber)
+            }
+            else if (dSet == FieldConcreteDatasetEnum.MixNumber)
             {
                 var result = await _connectionService.concreteMixNumberData.OnGetData(url);
                 ray = ConvertDataService.FromListToXml<FieldConcreteMixNumberDataset>(result.Value);
 
-            }else
+            }
+            else
                 return NotFound();
-            
-                
-               
-            // else if (dSet == FieldConcreteDatasetEnum.Strength)
-            //     ray = await _connectionService.concreteStrengthData.OnGetData(url);
-            // else if (dSet == FieldConcreteDatasetEnum.MixNumber)
-            //     ray = await _connectionService.concreteMixNumberData.OnGetData(url);
-            // else
-            //     return NotFound();
 
-            
-            
-            
             var date = DateTime.Now;
             var dateString = date.Month.ToString() + "-" + date.Day.ToString() + "-" + date.Year.ToString();
             string fileName = "concreteDataXml-" + dateString;
-
-            
-            
             return File(ray, "application/xml", fileName + ".xml");
         }
-
-
-
     }
-
-
 }

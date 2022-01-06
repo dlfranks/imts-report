@@ -101,42 +101,33 @@ export default function DataRequestForm()
                                             <pre>{ JSON.stringify(formParams, null, 2)}</pre>
                                         
                                     </Grid.Column>
-                    <Grid.Column>
-                        <Form.Field>
-                            <label>Data set</label>
-                            <Form.Select style={{marginTop:'7px', display:'block'}} placeholder='DataSet' value={formParams.dataset} name={'dataset'} onChange={handleDataSetChange} options={ DatasetOptions}/>
-                            
-                        
-                        </Form.Field>
-                        
-                        
-                        
-                                            
+                                    <Grid.Column>
+                                        <Form.Field>        
+                                            <label>Data set</label>
+                                            <Form.Select style={{marginTop:'7px', display:'block'}} placeholder='DataSet' value={formParams.dataset} name={'dataset'} onChange={handleDataSetChange} options={ DatasetOptions}/>
+                                        </Form.Field>
                                     </Grid.Column>
                                 </Grid.Row>
                                 <Grid.Row>
                                     <Grid.Column width={16}>
                                         <Popup 
                                             content={
-                                                
-
-                                                
                                                 <div className='api_popup'>
                                                     <Header as='h4'>Access this Dataset via API</Header>
                                                     
                                                     <div style={{clear:'both', marginBottom:'1em'}}>
-                                                        CSV: 
+                                                        Josn Endpoint: 
                                                         <div className="ui input" style={{ width: "400px", marginLeft:'1em' }}><input type="text"
-                                                            value={`http://localhost:5000/api/FieldConcreteTest/datum?projectId=${formParams.projectId}&dataset=${formParams.dataset}`}
+                                                            value={`http://localhost:5000/api/FieldConcreteTest/json?projectId=${formParams.projectId}&dataset=${formParams.dataset}`}
                                                         /></div>
                                                         <button className="ui button" onClick={() =>
                                                             navigator.clipboard.writeText("")}
                                                         >Copy</button>
                                                     </div>
                                                     <div style={{clear:'both', marginBottom:'1em'}}>
-                                                        API Endpoint: 
+                                                        Excel Endpoint: 
                                                         <div className="ui input" style={{ width: "400px", marginLeft:'1em' }}><input type="text"
-                                                            value={`http://localhost:5000/api/FieldConcreteTest/datum?projectId=${formParams.projectId}&dataset=${formParams.dataset}`}
+                                                            value={`http://localhost:5000/api/FieldConcreteTest/excel?projectId=${formParams.projectId}&dataset=${formParams.dataset}`}
                                                         /></div>
                                                         <button className="ui button" onClick={() =>
                                                             navigator.clipboard.writeText("")}

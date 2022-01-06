@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Xml.Serialization;
+using API.Helper;
 using OfficeOpenXml;
 
 namespace API.Services
@@ -102,7 +104,7 @@ namespace API.Services
             return table;
         }
 
-        public static Byte[] FromTableToExcel(DataTable table)
+        public static byte[] FromTableToExcel(DataTable table)
         {
             MemoryStream memoryStream = new MemoryStream();
             using (ExcelPackage package = new ExcelPackage(memoryStream))
@@ -146,6 +148,18 @@ namespace API.Services
             {
                 xmlSerializer.Serialize(writer, anyobject);
             }
+        }
+
+        public static string DataTableToJSON(DataTable table)
+        {
+            var options = new JsonSerializerOptions()
+            {
+                Converters = { new DataTableConverter(), new DataSetConverter(), new TimeSpanToStringConverter() }
+            };
+
+            string jsonDataTable = JsonSerializer.Serialize(table, options);
+
+            return jsonDataTable;
         }
 
 
