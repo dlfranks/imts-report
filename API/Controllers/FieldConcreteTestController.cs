@@ -28,25 +28,13 @@ namespace API.Controllers
             int projectId = 6754;
             int length = Enum.GetNames(typeof(FieldConcreteDatasetEnum)).Length;
 
-            for (int i = 0; i < length; i++){
-                int dataset = i + 1;
-                 FieldConcreteDatasetEnum dSet = (FieldConcreteDatasetEnum)dataset;
-                 string url = _concreteService.getUrl(projectId, dataset);
-            }
-               
             
-
-            byte[] ray = await _concreteService.createExcel(projectId, dataset);
+            string jsonString = await _concreteService.getSamples();
             var date = DateTime.Now;
             var dateString = date.Month.ToString() + "-" + date.Day.ToString() + "-" + date.Year.ToString();
             string fileName = "concreteDataExcel-" + dateString;
 
-            return File(
-            fileContents: ray,
-            contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-
-            fileDownloadName: fileName + ".xlsx"
-            );
+            return Ok(jsonString);
         }
 
         [Route("json")]

@@ -12,10 +12,13 @@ namespace API.Services
     {
         private readonly HttpClient _client;
         
-        public T data { get; set; }
+        //public T data { get; set; }
 
         public string apiUrl { get; set; }
-
+        public WebService()
+        {
+            _client = new HttpClient();
+        }
         public WebService(HttpClient client)
         {
             _client = client;
@@ -35,8 +38,8 @@ namespace API.Services
             if (response.IsSuccessStatusCode)
             {
                 var responseStream = await response.Content.ReadAsStreamAsync();
-                data = await JsonSerializer.DeserializeAsync<T>(responseStream, options);
-                return Result<T>.Success(data);
+                object data = await JsonSerializer.DeserializeAsync<T>(responseStream, options);
+                return Result<T>.Success((T)data);
             }else{
                 return Result<T>.Failure("HttpClient Failed.");
             }

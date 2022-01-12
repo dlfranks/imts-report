@@ -26,6 +26,11 @@ namespace API.Services
             for (int i = 0; i < props.Count - 1; i++)
             {
                 PropertyDescriptor prop = props[i];
+                if (prop.Name == "castDate")
+                {
+                    Console.WriteLine(prop.Name);
+                    table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+                }
                 table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
                 propNames[propCount] = prop.Name;
                 propCount++;
@@ -35,7 +40,12 @@ namespace API.Services
                 PropertyDescriptor prop = rowProps[j];
                 table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
                 propNames[propCount] = prop.Name;
+                if (propNames[propCount] == "castDate" || propNames[propCount] == "projectNo")
+                {
+                    Console.WriteLine(propNames[propCount]);
+                }
                 propCount++;
+
             }
 
             foreach (var test in data)
@@ -150,14 +160,14 @@ namespace API.Services
             }
         }
 
-        public static string DataTableToJSON(DataTable table)
+        public static string DataTableToJSON(DataSet dataset)
         {
             var options = new JsonSerializerOptions()
             {
                 Converters = { new DataTableConverter(), new DataSetConverter(), new TimeSpanToStringConverter() }
             };
 
-            string jsonDataTable = JsonSerializer.Serialize(table, options);
+            string jsonDataTable = JsonSerializer.Serialize(dataset, options);
 
             return jsonDataTable;
         }

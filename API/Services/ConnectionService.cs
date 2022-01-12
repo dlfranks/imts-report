@@ -49,10 +49,10 @@ namespace API.Services
                 return _concreteMixNumberData;
             }
         }
-        public T getConcreteData<T>(int dataset)
-        {
-            //if(dataset == 1)
-                return _concreteMixNumberData;
-        }
+
+        
+        
     }
+
+    
 }

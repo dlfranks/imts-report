@@ -1,5 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
+using API.Helper;
+using API.Models.Core;
+using API.Services;
 
 namespace API.Models.FieldConcreteTest
 {
@@ -10,15 +16,86 @@ namespace API.Models.FieldConcreteTest
         MixNumber,
 
     }
-    public class FieldConcreteSampleDataset{
-        public FieldConcreteSampleDataset(){
-            fullDataset = new List<FieldConcreteDatumFlattenDataset>();
-            strengthDataset = new List<FieldConcreteStrengthDataset>();
-            mixNumberDataset = new List<FieldConcreteMixNumberDataset>();
-        }
+    public abstract class FieldConcreteSampleDataset
+    {
+
         public List<FieldConcreteDatumFlattenDataset> fullDataset { get; set; }
         public List<FieldConcreteStrengthDataset> strengthDataset { get; set; }
         public List<FieldConcreteMixNumberDataset> mixNumberDataset { get; set; }
+
+
+    }
+
+    // public class ConcreteFullFactory : ConcreteDatumFactory
+    // {
+    //     private ConnectionService _connectionService;
+    //     public ConcreteFullFactory(ConnectionService connectionService){
+    //         _connectionService = connectionService;
+    //     }
+    //     public override async Task<List<FieldConcreteDatumDataset>> getService(string url)
+    //     {
+    //         Result<List<FieldConcreteDatumDataset>> result = await _connectionService.concreteDatumData.OnGetData(url);
+    //         return result.Value;
+    //     }
+
+    // }
+    // public class ConcreteStrengthFactory : ConcreteDatumFactory
+    // {
+    //     private ConnectionService _connectionService;
+    //     public ConcreteStrengthFactory(ConnectionService connectionService){
+    //         _connectionService = connectionService;
+    //     }
+    //     public override async Task<List<FieldConcreteDatum>> getService(string url)
+    //     {
+    //         Result<List<FieldConcreteStrengthDataset>> result = await _connectionService.concreteStrengthData.OnGetData(url);
+    //         List<FieldConcreteDatum> dataset = (List<FieldConcreteDatum>)result.Value;
+    //         return dataset;
+    //     }
+
+    // }
+    // public abstract class ConcreteDatumFactory{
+
+    //     public abstract Task<List<FieldConcreteDatum>> getService(string url);
+
+    // }
+
+    public class FieldConcreteProps
+    {
+        public object fields { get; set; }
+        public int length { get; set; }
+
+    }
+    public class FieldConcreteBase
+    {
+
+        public string projectNo { get; set; }
+        public string projectName { get; set; }
+        public string labNo { get; set; }
+        public DateTime? castDate { get; set; }
+        protected async Task<Result<T>> OnGetData<T>(string url)
+        {
+            HttpClient client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                url);
+            request.Headers.Add("Accept", "application/json");
+
+            var response = await client.SendAsync(request);
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+            };
+            options.Converters.Add(new TimeSpanToStringConverter());
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStream = await response.Content.ReadAsStreamAsync();
+                T data = await JsonSerializer.DeserializeAsync<T>(responseStream, options);
+                return Result<T>.Success(data);
+            }
+            else
+            {
+                return Result<T>.Failure("HttpClient Failed.");
+            }
+        }
     }
     public class FieldConcreteDatumAttachmentDataset
     {
@@ -90,7 +167,7 @@ namespace API.Models.FieldConcreteTest
 
     }
 
-    public class FieldConcreteDatumDataset
+    public class FieldConcreteDatumDataset : FieldConcreteBase
     {
         public FieldConcreteDatumDataset()
         {
@@ -101,7 +178,6 @@ namespace API.Models.FieldConcreteTest
         }
         //testSubTypes based on region, ie CSA or ASTM/AAHSTO depends on officeRegion, gram weight of specimens is only CSA
         //----Sample-------------------------------------
-        public string displayLabNo { get; set; }
         public string displayWorkflowStateName { get; set; }
         public bool displayFieldConcreteAllBreaksCompleted { get; set; }
         //-----Test-----------------------------------------
@@ -124,8 +200,6 @@ namespace API.Models.FieldConcreteTest
         //-----Project---------------------------------------------
         public string displayOfficeName { get; set; }
         public string displayAddress { get; set; }
-        public string displayProjectName { get; set; }
-        public string displayProjectNo { get; set; }
         public string displayProjectManaer { get; set; }
         public bool DisplayIsEngineerSignatureRequired { get; set; }
         //Client and client contact
@@ -182,7 +256,6 @@ namespace API.Models.FieldConcreteTest
         public bool wasAggregateCorrectionDone { get; set; }
         public int? flexuralBeamTestType { get; set; }
         public string permitNo { get; set; }
-        public DateTime castDate { get; set; }
         public string placementType { get; set; }
         public string placementLocation { get; set; }
         public string specimenStorage { get; set; }
@@ -245,10 +318,9 @@ namespace API.Models.FieldConcreteTest
         public virtual List<FieldConcreteDatumTestRowDataset> testRows { get; set; }
     }
 
-    public class FieldConcreteDatumFlattenDataset
+    public class FieldConcreteDatumFlattenDataset : FieldConcreteBase
     {
         //----Sample-------------------------------------
-        public string displayLabNo { get; set; }
         public string displayWorkflowStateName { get; set; }
         public bool displayFieldConcreteAllBreaksCompleted { get; set; }
         //-----Test-----------------------------------------
@@ -271,8 +343,6 @@ namespace API.Models.FieldConcreteTest
         //-----Project---------------------------------------------
         public string displayOfficeName { get; set; }
         public string displayAddress { get; set; }
-        public string displayProjectName { get; set; }
-        public string displayProjectNo { get; set; }
         public string displayProjectManaer { get; set; }
         public bool DisplayIsEngineerSignatureRequired { get; set; }
         //Client and client contact
@@ -329,7 +399,6 @@ namespace API.Models.FieldConcreteTest
         public bool wasAggregateCorrectionDone { get; set; }
         public int? flexuralBeamTestType { get; set; }
         public string permitNo { get; set; }
-        public DateTime castDate { get; set; }
         public string placementType { get; set; }
         public string placementLocation { get; set; }
         public string specimenStorage { get; set; }
@@ -388,19 +457,15 @@ namespace API.Models.FieldConcreteTest
         public virtual List<FieldConcreteDatumTestRowDataset> testRows { get; set; }
     }
 
-    public class FieldConcreteStrengthDataset
+    public class FieldConcreteStrengthDataset : FieldConcreteBase
     {
         public FieldConcreteStrengthDataset()
         {
             testRows = new List<FieldConcreteStrengthRowDataset>();
         }
-        public string displayProjectNo { get; set; }
-        public string displayProjectName { get; set; }
-        public string displayLabNo { get; set; }
         public string displayTestSubTypeName { get; set; }
         public string displaySupplierName { get; set; }
         public string mixNumber { get; set; }
-        public DateTime castDate { get; set; }
         public double? displayUwSlumpActual { get; set; }
         public double? displayUwSpreadActual { get; set; }
         public double? displayUwAirActual { get; set; }
@@ -436,23 +501,21 @@ namespace API.Models.FieldConcreteTest
         public double? calcCompressiveStrength { get; set; }
         public double? calcCompressiveStrengthUnrounded { get; set; }
     }
-    public class FieldConcreteMixNumberDataset
+    public class FieldConcreteMixNumberDataset : FieldConcreteBase
     {
         public FieldConcreteMixNumberDataset()
         {
-            TestRows = new List<FieldConcreteMixNumberRowDataset>();
+            testRows = new List<FieldConcreteMixNumberRowDataset>();
         }
-        public string ProjectName { get; set; }
-        public string LabNo { get; set; }
-        public DateTime? CastDate { get; set; }
-        public string MixNumber { get; set; }
-        public List<FieldConcreteMixNumberRowDataset> TestRows { get; set; }
+
+        public string mixNumber { get; set; }
+        public List<FieldConcreteMixNumberRowDataset> testRows { get; set; }
     }
 
     public class FieldConcreteMixNumberRowDataset
     {
-        public string SpecimenId { get; set; }
-        public int DaysToAge { get; set; }
+        public string specimenId { get; set; }
+        public int daysToAge { get; set; }
     }
 
 }
