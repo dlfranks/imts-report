@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Xml.Serialization;
 using API.Helper;
@@ -14,39 +15,54 @@ namespace API.Services
 {
     public static class ConvertDataService
     {
-        public static DataTable ConvertToTable<T>(List<T> data, PropertyDescriptorCollection props, PropertyDescriptorCollection rowProps)
+        public static DataTable ConvertToTable<T>(List<T> data, PropertyInfo[] props, PropertyInfo[] rowProps)
         {
             DataTable table = new DataTable();
             //PropertyDescriptorCollection props = TypeDescriptor.GetProperties(typeof(FieldConcreteTestFlattenJsonDataset));
             //PropertyDescriptorCollection rowProps = TypeDescriptor.GetProperties(typeof(FieldConcreteTestRowJsonDataset));
-            int totalProps = (props.Count - 1) + rowProps.Count;
+            bool hasTestRows = false;
+            for (int i = 0; i < props.Count(); i++)
+            {
+                PropertyInfo prop = props[i];
+
+                if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    hasTestRows = true;
+                }
+            }
+            int totalProps = hasTestRows ? (props.Count() - 1) + rowProps.Count() : props.Count();
             object[] propNames = new object[totalProps];
 
             int propCount = 0;
-            for (int i = 0; i < props.Count - 1; i++)
+            for (int i = 0; i < props.Count(); i++)
             {
-                PropertyDescriptor prop = props[i];
-                if (prop.Name == "castDate")
+                PropertyInfo prop = props[i];
+
+                if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
-                    Console.WriteLine(prop.Name);
+                    for (int j = 0; j < rowProps.Count(); j++)
+                    {
+                        PropertyInfo rowProp = rowProps[j];
+                        table.Columns.Add(rowProp.Name, Nullable.GetUnderlyingType(rowProp.PropertyType) ?? rowProp.PropertyType);
+                        propNames[propCount] = rowProp.Name;
+                        if (propNames[propCount] == "castDate" || propNames[propCount] == "projectNo")
+                        {
+                            Console.WriteLine(propNames[propCount]);
+                        }
+                        propCount++;
+
+                    }
+                }
+                else
+                {
                     table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+                    propNames[propCount] = prop.Name;
+                    propCount++;
+
                 }
-                table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
-                propNames[propCount] = prop.Name;
-                propCount++;
-            }
-            for (int j = 0; j < rowProps.Count; j++)
-            {
-                PropertyDescriptor prop = rowProps[j];
-                table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
-                propNames[propCount] = prop.Name;
-                if (propNames[propCount] == "castDate" || propNames[propCount] == "projectNo")
-                {
-                    Console.WriteLine(propNames[propCount]);
-                }
-                propCount++;
 
             }
+
 
             foreach (var test in data)
             {
@@ -55,9 +71,9 @@ namespace API.Services
 
                 int valueCount = 0;
 
-                for (int i = 0; i < props.Count; i++)
+                for (int i = 0; i < props.Count(); i++)
                 {
-                    PropertyDescriptor prop = props[i];
+                    PropertyInfo prop = props[i];
 
                     if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                     {
@@ -74,9 +90,9 @@ namespace API.Services
                                     var cloneRow = table.NewRow();
                                     cloneRow.ItemArray = copyRow.ItemArray;
 
-                                    for (int j = 0; j < rowProps.Count; j++)
+                                    for (int j = 0; j < rowProps.Count(); j++)
                                     {
-                                        PropertyDescriptor rProp = rowProps[j];
+                                        PropertyInfo rProp = rowProps[j];
 
                                         cloneRow[rProp.Name] = rProp.GetValue(r) ?? DBNull.Value;
                                         valueCount++;
@@ -86,9 +102,9 @@ namespace API.Services
                                 }
                                 else
                                 {
-                                    for (int j = 0; j < rowProps.Count; j++)
+                                    for (int j = 0; j < rowProps.Count(); j++)
                                     {
-                                        PropertyDescriptor rProp = rowProps[j];
+                                        PropertyInfo rProp = rowProps[j];
 
                                         actualRow[rProp.Name] = rProp.GetValue(r) ?? DBNull.Value;
                                         valueCount++;

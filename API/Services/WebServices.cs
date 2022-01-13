@@ -11,7 +11,7 @@ namespace API.Services
     public class WebService<T> : IWebService<T>
     {
         private readonly HttpClient _client;
-        
+
         //public T data { get; set; }
 
         public string apiUrl { get; set; }
@@ -23,8 +23,9 @@ namespace API.Services
         {
             _client = client;
         }
-        public async Task<Result<T>> OnGetData(string url)
+        public async Task<Result<T>> OnGetData(string url, bool isSample = false)
         {
+            url = isSample ? url + "&isSample=true" : url;
             var request = new HttpRequestMessage(HttpMethod.Get,
                 url);
             request.Headers.Add("Accept", "application/json");
@@ -40,10 +41,12 @@ namespace API.Services
                 var responseStream = await response.Content.ReadAsStreamAsync();
                 object data = await JsonSerializer.DeserializeAsync<T>(responseStream, options);
                 return Result<T>.Success((T)data);
-            }else{
+            }
+            else
+            {
                 return Result<T>.Failure("HttpClient Failed.");
             }
         }
     }
-    
+
 }

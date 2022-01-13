@@ -5,6 +5,6 @@ namespace API.Services
 {
     public interface IWebService<T>
     {
-        Task<Result<T>> OnGetData(string url);
+        Task<Result<T>> OnGetData(string url, bool isSample = false);
     }
 }
