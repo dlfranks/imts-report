@@ -21,7 +21,7 @@ namespace API.Controllers
             _connectionService = connectionService;
         }
 
-        [Route("sampleDatasets")]
+        [Route("samples")]
         [HttpGet]
         public async Task<IActionResult> sampleDatasets()
         {

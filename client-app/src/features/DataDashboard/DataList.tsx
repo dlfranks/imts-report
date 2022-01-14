@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Divider, Header } from "semantic-ui-react";
 
 import AutoCompleteTest from "./AutoCompleteTest";
@@ -6,8 +6,13 @@ import DataListItem from "./DataListItem";
 import DataRequestForm from "./DataRequestForm";
 import DataTable from "./DataTable";
 import data from "../../app/common/autoComplete/data.json";
+import { useStore } from "../../app/stores/store";
+
 
 export default function DataList() {
+    
+    
+    
     
     return (
         

@@ -1,12 +1,23 @@
+
 import { makeAutoObservable } from "mobx";
 import React from "react";
 import agent from "../api/agent";
 import { ConcreteParam } from '../models/concreteInterface';
 import FileSaver from 'file-saver';
 
+export interface ConcreteTable{
+    [key:string]: LooseObject[],
+    
+}
+export interface LooseObject {
+    [key: string]: any
+}
+
 export default class ConcreteStore {
+    samples: ConcreteTable[] | undefined = undefined;
     loadingInitial = false;
     downloaded = false;
+    sampleReady = false;
 
     constructor() {
         makeAutoObservable(this)
@@ -41,6 +52,20 @@ export default class ConcreteStore {
             link.click();
             this.downloaded = false;
         }
+    }
+
+    getSamples = async () => {
+        try {
+            const data = await agent.Concrete.samples();
+            // this.sampleReady = true;
+            
+        }
+        catch (error) {
+        
+        }
+    }
+    setSampleReady = (state:boolean) => {
+        this.sampleReady = state;
     }
 
 }
