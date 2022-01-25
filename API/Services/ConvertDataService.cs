@@ -180,8 +180,11 @@ namespace API.Services
         {
             var options = new JsonSerializerOptions()
             {
-                Converters = { new DataTableConverter(), new DataSetConverter(), new TimeSpanToStringConverter() }
+                Converters = { new DataTableConverter(), new DataSetConverter(), new TimeSpanToStringConverter() },
+                IgnoreNullValues = true
+
             };
+
 
             string jsonDataTable = JsonSerializer.Serialize(dataset, options);
 

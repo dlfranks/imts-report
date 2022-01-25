@@ -4,7 +4,7 @@ import { Project } from "../models/coreInterface";
 import CommonStore from '../stores/commonStore';
 import { store } from "../stores/store";
 import { ConcreteParam } from '../models/concreteInterface';
-import { ConcreteTable } from "../stores/concreteStore";
+
 
 const sleep = (delay: number) => {
     return new Promise((resolve) => {
@@ -34,14 +34,12 @@ const Projects = {
 
 const Concrete = {
     json: (params: ConcreteParam) => {
-        requests.download(`/FieldConcrteTest/json?projectId=${params.projectId}&dataset=${params.dataset}&format=${params.format}`);
+        requests.download(`/FieldConcreteTest/json?projectId=${params.projectId}&dataset=${params.dataset}&format=${params.format}`);
     },
     samples: () => {
         //requests.get<ConcreteTable[]>(`/FieldConcrteTest/samples`)
-        const url = `/FieldConcrteTest/samples`;
-        axios.get(url).then((data) => {
-            const samples = data;
-        });
+        const url = `/FieldConcreteTest/samples`;
+        return axios.get(url).then((responseBody));
     }
     
     

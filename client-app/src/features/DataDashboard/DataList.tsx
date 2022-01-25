@@ -7,24 +7,37 @@ import DataRequestForm from "./DataRequestForm";
 import DataTable from "./DataTable";
 import data from "../../app/common/autoComplete/data.json";
 import { useStore } from "../../app/stores/store";
+import { LooseObject } from '../../app/stores/concreteStore';
+import { ConcreteTableSamples } from "../../app/models/concreteInterface";
 
 
 export default function DataList() {
     
+    const { concreteStore } = useStore();
+    const { samples, getSamples, sampleReady } = concreteStore;
     
-    
+    useEffect(() => {
+        //if (id) loadActivity(id).then(activity => setActivity(activity!))
+        if (!sampleReady) {
+            getSamples();
+        }
+
+    }, [samples, getSamples, sampleReady]);
+
+    //if (!sampleReady) return null;
     
     return (
         
         <Container style={{ backgroundColor: '#fff', padding: '1em' }}>
             <Header as='h3' content='Concrete Data' />
-            <Divider/>
+            <Divider />
             <Header as='h4' content='Full Dataset' />
-            <DataTable />
-            <Header as='h4' content='Mix Number Dataset' />
-            <DataTable />
-            <Header as='h4' content='Strength Dataset' />
-            <DataTable />
+                <DataTable data={ samples.full}/>
+                <Header as='h4' content='Mix Number Dataset' />
+                <DataTable data={samples.strength}/>
+                <Header as='h4' content='Strength Dataset' />
+                <DataTable data={samples.mixNumber} />
+            
             <DataRequestForm />
             <AutoCompleteTest />
             

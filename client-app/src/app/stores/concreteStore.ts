@@ -1,12 +1,13 @@
 
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import React from "react";
 import agent from "../api/agent";
-import { ConcreteParam } from '../models/concreteInterface';
+import { ConcreteParam, ConcreteTableSamples } from '../models/concreteInterface';
 import FileSaver from 'file-saver';
+import { ObjectSchema } from "yup";
 
-export interface ConcreteTable{
-    [key:string]: LooseObject[],
+export interface TableDataset{
+    data: LooseObject[];
     
 }
 export interface LooseObject {
@@ -14,7 +15,7 @@ export interface LooseObject {
 }
 
 export default class ConcreteStore {
-    samples: ConcreteTable[] | undefined = undefined;
+    samples : ConcreteTableSamples = { full: [], strength: [], mixNumber: [] };;
     loadingInitial = false;
     downloaded = false;
     sampleReady = false;
@@ -56,12 +57,47 @@ export default class ConcreteStore {
 
     getSamples = async () => {
         try {
-            const data = await agent.Concrete.samples();
-            // this.sampleReady = true;
+            await agent.Concrete.samples().then((data) => {
+                
+                
+                const { Table1, Table2, Table3 } = data;
+                
+                const samples: ConcreteTableSamples = { full: [], strength: [], mixNumber: [] };
+
+                let tableKeys = (Object.keys(data) as Array<keyof typeof data>).reduce((accumulator, current) => {
+                    accumulator.push(current);
+                    return accumulator;
+                }, [] as (typeof data[keyof typeof data])[]);
+
+                
+                
+                tableKeys.forEach(tableKey => {
+                    
+                    if (tableKey === 'Table1') {
+                        let table: LooseObject[] = data[tableKey] as LooseObject[];
+                        samples.full = table;
+                        console.log(table[0]);
+                    } else if (tableKey === 'Table2') {
+                        let table: LooseObject[] = data[tableKey] as LooseObject[];
+                        samples["strength"] = table;
+                    } else if(tableKey === 'Table3'){
+                        let table: LooseObject[] = data[tableKey] as LooseObject[];
+                        samples["mixNumber"] = table;
+                    }
+                    
+
+                });
+                runInAction(() => {
+                    this.samples = { ...samples };
+                    this.sampleReady = true;
+                });
+                
+            });
+            
             
         }
         catch (error) {
-        
+            this.sampleReady = false;
         }
     }
     setSampleReady = (state:boolean) => {

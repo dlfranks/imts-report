@@ -12,6 +12,7 @@ namespace API.Models.FieldConcreteTest
     public enum FieldConcreteDatasetEnum
     {
         Full = 1,
+        FlattenFull,
         Strength,
         MixNumber,
 

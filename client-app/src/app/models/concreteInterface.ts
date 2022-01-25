@@ -1,3 +1,4 @@
+import { LooseObject } from './../stores/concreteStore';
 import React from "react";
 import internal from "stream";
 
@@ -9,6 +10,9 @@ export interface ConcreteParam {
 
 
 
-export interface FieldConcreteTestDatum {
+export interface ConcreteTableSamples {
+    full: LooseObject[];
+    strength: LooseObject[];
+    mixNumber: LooseObject[];
     
 }

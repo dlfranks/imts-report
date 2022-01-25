@@ -9,7 +9,7 @@ namespace API.Helper
     {
         public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var value=reader.GetString();
+            var value = reader.GetString();
             return TimeSpan.Parse(value);
         }
 
@@ -37,11 +37,12 @@ namespace API.Helper
                 writer.WriteStartObject();
                 foreach (DataColumn column in row.Table.Columns)
                 {
-                    object columnValue = row[column];
+                    object columnValue = row[column] == DBNull.Value ? null : row[column];
 
                     // If necessary:
                     if (options.IgnoreNullValues)
                     {
+
                         // Do null checks on the values here and skip writing.
                     }
 
