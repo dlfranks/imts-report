@@ -1,25 +1,14 @@
-import { Button, Grid, Item, List, Segment } from "semantic-ui-react";
-import DataTable from "./DataTable";
-import DataRequestForm from "./DataRequestForm";
-import DataListItem from "./DataListItem";
-import TestList from "./TestList";
+import { Container, Grid } from "semantic-ui-react";
+
 import DataList from "./DataList";
-import { useStore } from "../../app/stores/store";
-import { useEffect } from "react";
-
-
+import TestList from "./TestList";
+import styled from 'styled-components';
 
 export default function DataDashboard() {
-    const { concreteStore } = useStore();
     
-
-    
-
-    
-   
-
     return (
-        <Grid>
+        
+            <Grid>
             
             <Grid.Column width='4'>
                 <TestList />
@@ -28,6 +17,8 @@ export default function DataDashboard() {
                 <DataList />
             </Grid.Column>
             
-        </Grid>
+            </Grid>
+        
+        
     )
 }

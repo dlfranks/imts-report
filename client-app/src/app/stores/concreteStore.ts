@@ -15,7 +15,7 @@ export interface LooseObject {
 }
 
 export default class ConcreteStore {
-    samples : ConcreteTableSamples = { full: [], strength: [], mixNumber: [] };;
+    samples = { full: [], strength: [], mixNumber: [] };;
     loadingInitial = false;
     downloaded = false;
     sampleReady = false;
@@ -62,7 +62,7 @@ export default class ConcreteStore {
                 
                 const { Table1, Table2, Table3 } = data;
                 
-                const samples: ConcreteTableSamples = { full: [], strength: [], mixNumber: [] };
+                const samples = { full: [], strength: [], mixNumber: [] };
 
                 let tableKeys = (Object.keys(data) as Array<keyof typeof data>).reduce((accumulator, current) => {
                     accumulator.push(current);
@@ -74,14 +74,14 @@ export default class ConcreteStore {
                 tableKeys.forEach(tableKey => {
                     
                     if (tableKey === 'Table1') {
-                        let table: LooseObject[] = data[tableKey] as LooseObject[];
+                        let table = data[tableKey] ;
                         samples.full = table;
                         console.log(table[0]);
                     } else if (tableKey === 'Table2') {
-                        let table: LooseObject[] = data[tableKey] as LooseObject[];
+                        let table = data[tableKey] ;
                         samples["strength"] = table;
                     } else if(tableKey === 'Table3'){
-                        let table: LooseObject[] = data[tableKey] as LooseObject[];
+                        let table = data[tableKey] ;
                         samples["mixNumber"] = table;
                     }
                     

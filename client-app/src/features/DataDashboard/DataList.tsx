@@ -2,19 +2,41 @@ import React, { useEffect } from "react";
 import { Container, Divider, Header } from "semantic-ui-react";
 
 import AutoCompleteTest from "./AutoCompleteTest";
-import DataListItem from "./DataListItem";
+
 import DataRequestForm from "./DataRequestForm";
-import DataTable from "./DataTable";
-import data from "../../app/common/autoComplete/data.json";
+
+
 import { useStore } from "../../app/stores/store";
-import { LooseObject } from '../../app/stores/concreteStore';
-import { ConcreteTableSamples } from "../../app/models/concreteInterface";
+import MyTable from '../../app/common/table/MyTable';
+import { observer } from "mobx-react-lite";
 
 
-export default function DataList() {
+
+
+
+
+export default observer(function DataList() {
     
     const { concreteStore } = useStore();
     const { samples, getSamples, sampleReady } = concreteStore;
+
+    const headers  = (data: {}) => {
+        
+
+        let list:{[key:string]: string}= {};
+        Object.keys(data).map((key) =>  {
+            list[key.toString()] = key;
+            
+                
+                
+        });
+        
+        console.log(list);
+
+        return list ;
+        
+
+    }
     
     useEffect(() => {
         //if (id) loadActivity(id).then(activity => setActivity(activity!))
@@ -24,27 +46,26 @@ export default function DataList() {
 
     }, [samples, getSamples, sampleReady]);
 
-    //if (!sampleReady) return null;
+    if (!sampleReady) return null;
     
     return (
-        
-        <Container style={{ backgroundColor: '#fff', padding: '1em' }}>
-            <Header as='h3' content='Concrete Data' />
-            <Divider />
-            <Header as='h4' content='Full Dataset' />
-                <DataTable data={ samples.full}/>
-                <Header as='h4' content='Mix Number Dataset' />
-                <DataTable data={samples.strength}/>
-                <Header as='h4' content='Strength Dataset' />
-                <DataTable data={samples.mixNumber} />
-            
-            <DataRequestForm />
-            <AutoCompleteTest />
-            
-            
+        <Container style={{ backgroundColor: '#fff', padding: '1em 2em' }}>
+            <Container >
+                <Header as='h3' content='Concrete Data' />
+                <Divider />
+                <Header as='h4' content='Full Dataset' />
+                    <MyTable items={ samples.full} headers={headers(samples.full[0])}/>
+                    <Header as='h4' content='Mix Number Dataset' />
+                    <MyTable items={samples.strength} headers={headers(samples.strength[0])}/>
+                    <Header as='h4' content='Strength Dataset' />
+                    <MyTable items={samples.mixNumber}  headers={headers(samples.mixNumber[0])}/>
+            </Container>
+            <Container style={{margin:'5em 0'}}>
+                <DataRequestForm />
+                
+            </Container>
         </Container>
-        
             
         
     );
-}
+})

@@ -62,7 +62,9 @@ namespace API.Controllers
                 FirstName = registerDto.FirstName,
                 LastName = registerDto.LastName,
                 Email = registerDto.Email,
-                UserName = registerDto.Email
+                UserName = registerDto.Email,
+                IsWoodEmployee = registerDto.IsWoodEmployee,
+                OfficeId = registerDto.OfficeId
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -74,7 +76,8 @@ namespace API.Controllers
 
             return BadRequest("Problem registering user");
         }
-
+        [Authorize]
+        [HttpGet]
         public async Task<ActionResult<UserDTO>> GetCurrentUser()
         {
             var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));

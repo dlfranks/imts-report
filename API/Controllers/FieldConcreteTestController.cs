@@ -6,6 +6,7 @@ using API.Models.Core;
 using API.Models.FieldConcreteTest;
 using API.Services;
 using API.Services.ConcreteService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -20,7 +21,7 @@ namespace API.Controllers
             _concreteService = concreteService;
             _connectionService = connectionService;
         }
-
+        
         [Route("samples")]
         [HttpGet]
         public async Task<IActionResult> sampleDatasets()

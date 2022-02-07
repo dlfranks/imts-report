@@ -30,7 +30,7 @@ export default function DataTable({ data }: Props) {
         const body =  data.map((row) => {
             return (<Table.Row>
                 {
-                    row.map((column: any) => {
+                   Object.keys(row).map((column) => {
                         return (<Table.Cell>{column}</Table.Cell>);
                     })
                 }

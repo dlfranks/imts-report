@@ -14,3 +14,17 @@ body {
   
   width: 600px;
 }
+table {
+  border-spacing: 0px;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+
+tbody > tr:nth-child(2n) {
+  background: lightblue;
+}
+table, td, th {
+  
+  margin: 0;
+  padding: 0;
+}

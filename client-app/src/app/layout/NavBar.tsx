@@ -1,31 +1,31 @@
 //import { Link, NavLink } from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
+import { NavLink } from 'react-router-dom';
 import { Container, Menu, Button, Image, Dropdown } from 'semantic-ui-react';
 import { useStore } from '../stores/store';
 
-export default function NavBar() {
-    //const { userStore : {user, logout}} = useStore();
+export default observer(function NavBar() {
+    const { userStore : {user, logout}} = useStore();
     return (
         <Menu inverted fixed='top'>
             <Container>
-                <Menu.Item header>
-                    <img src="/assets/logo.png" alt='logo' style={{marginRight: '10px'}}/>
+                <Menu.Item header exact as={NavLink} to="/">
+                    <img src="/assets/logo.jpg" alt='logo' style={{marginRight: '10px'}}/>
                     Imts Data Portal
                 </Menu.Item>
-                {/* <Menu.Item  to='/activities' name='Activities' />
-                <Menu.Item  to='/errors' name='Errors'/>
-                <Menu.Item>
-                    <Button  to='/createActivity' positive content='Create Activity' />
-                </Menu.Item> */}
+                <Menu.Item as={ NavLink} to='/fieldData' name='FieldDataService' />
+                <Menu.Item as={NavLink} to='/errors' name='Errors'/>
+                
                 <Menu.Item position='right'>
-                    <Image  avatar spaced='right' />
-                    <Dropdown pointing='top left' >
+                    <Image src={user?.image || '/assets/user.png'} avatar spaced='right' />
+                    <Dropdown pointing='top left' text={`${user?.displayName}`}>
                         <Dropdown.Menu>
-                            <Dropdown.Item   text='My Profile' icon='user' />
-                            <Dropdown.Item  text='Logout' icon='power' />
+                            <Dropdown.Item to={`/profile/${user?.username}`}  text='My Profile' icon='user' />
+                            <Dropdown.Item onClick={logout} text='Logout' icon='power' />
                         </Dropdown.Menu>
                     </Dropdown>
                 </Menu.Item>
             </Container>
         </Menu>
     )
-}
+})
