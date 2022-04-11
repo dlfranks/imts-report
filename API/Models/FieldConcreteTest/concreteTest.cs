@@ -5,14 +5,12 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using API.Helper;
 using API.Models.Core;
-using API.Services;
 
 namespace API.Models.FieldConcreteTest
 {
     public enum FieldConcreteDatasetEnum
     {
         Full = 1,
-        FlattenFull,
         Strength,
         MixNumber,
 

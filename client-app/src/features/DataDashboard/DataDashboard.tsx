@@ -1,8 +1,9 @@
 import { Container, Grid } from "semantic-ui-react";
 
+
+import styled from 'styled-components';
 import DataList from "./DataList";
 import TestList from "./TestList";
-import styled from 'styled-components';
 
 export default function DataDashboard() {
     

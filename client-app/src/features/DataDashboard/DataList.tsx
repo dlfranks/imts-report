@@ -1,14 +1,9 @@
 import React, { useEffect } from "react";
 import { Container, Divider, Header } from "semantic-ui-react";
-
-import AutoCompleteTest from "./AutoCompleteTest";
-
-import DataRequestForm from "./DataRequestForm";
-
-
 import { useStore } from "../../app/stores/store";
 import MyTable from '../../app/common/table/MyTable';
 import { observer } from "mobx-react-lite";
+import DataRequestForm from "./DataRequestForm";
 
 
 

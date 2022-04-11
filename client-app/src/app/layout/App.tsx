@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Container} from 'semantic-ui-react';
-import DataDashboard from '../../features/dataDashboard/DataDashboard';
+import DataDashboard from '../../features/DataDashboard/DataDashboard';
 import ModalContainer from '../common/modals/ModalContainer';
 import NavBar from './NavBar';
 import HomePage from '../../features/home/Homepage';

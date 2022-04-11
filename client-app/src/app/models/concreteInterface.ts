@@ -16,3 +16,13 @@ export interface ConcreteTableSamples {
     mixNumber: LooseObject[];
     
 }
+
+interface ConcreteDatasetOptionModel{
+    text: string,
+    value:number
+}
+export const ConcreteDatasetOptions = [
+    { text: 'Full', value: 1 },
+    { text: 'Strength', value: 2 },
+    {text: 'Mix Number', value: 3}
+]
