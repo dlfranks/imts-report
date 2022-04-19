@@ -49,7 +49,7 @@ namespace API.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             //permissionForEmployee()
-            
+
             var claims = await _userManager.GetClaimsAsync(currentUser);
             var officeId = claims.FirstOrDefault(c => c.Type == "officeId");
             //validate an email
@@ -75,7 +75,7 @@ namespace API.Controllers
                 Email = registerDto.Email,
                 UserName = registerDto.Email,
                 IsWoodEmployee = registerDto.IsWoodEmployee,
-                MainOfficeId = officeId
+
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
