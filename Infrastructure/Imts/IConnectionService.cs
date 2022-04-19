@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using API.Models.FieldConcreteTest;
+using Application.FieldConcreteTest;
+using Infrastructure.Core;
 
-namespace API.Services
+namespace Infrastructure.Imts.ConnectionService
 {
     public interface IConnectionService
     {

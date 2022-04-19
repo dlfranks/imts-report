@@ -1,4 +1,4 @@
-namespace Domain.Imts
+namespace Domain.Project
 {
     public class Project
     {

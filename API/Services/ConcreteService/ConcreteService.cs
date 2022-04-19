@@ -1,29 +1,26 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using API.Models.Core;
-using API.Models.FieldConcreteTest;
+using Application.Core;
+using Application.FieldConcreteTest;
+using Infrastructure.Imts;
+using Infrastructure.Imts.ConnectionService;
 using Microsoft.Extensions.Configuration;
-using OfficeOpenXml;
+using Microsoft.Extensions.Options;
 
 namespace API.Services.ConcreteService
 {
     public class ConcreteService
     {
         private readonly IConnectionService _connectService;
-
-        private readonly IConfiguration _config;
-
-        private readonly string baseUrl = "http://localhost:6777/ReportService/FieldConcreteJsonData";
-        public ConcreteService(IConnectionService connectService, IConfiguration config)
+        private readonly string _baseUrl;
+        public ConcreteService(IConnectionService connectService, IOptions<ImtsSettings> config)
         {
-            _config = config;
+            
             _connectService = connectService;
+            _baseUrl = config.Value.BaseUrl;
 
         }
         public async Task<string> getSamples()
@@ -60,7 +57,7 @@ namespace API.Services.ConcreteService
             {
                 case 1:
                     var datumResult = await _connectService.concreteDatumFlattenData.OnGetData(url, true);
-                    if(datumResult.IsSuccess)
+                    if (datumResult.IsSuccess)
                     {
                         PropertyInfo[] flattenproperties = typeof(FieldConcreteDatumFlattenDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
                         PropertyInfo[] flattenRowsproperties = typeof(FieldConcreteDatumTestRowDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -68,20 +65,24 @@ namespace API.Services.ConcreteService
                         // PropertyDescriptorCollection flattenRowType = TypeDescriptor.GetProperties(typeof(FieldConcreteDatumTestRowDataset));
 
                         tbl = ConvertDataService.ConvertToTable<FieldConcreteDatumFlattenDataset>(datumResult.Value, flattenproperties, flattenRowsproperties);
-                    }else{
+                    }
+                    else
+                    {
                         Console.WriteLine(datumResult.Error);
                     }
-                    
-                    
+
+
                     break;
                 case 2:
                     var strengthResult = await _connectService.concreteStrengthData.OnGetData(url, true);
-                    if(strengthResult.IsSuccess)
+                    if (strengthResult.IsSuccess)
                     {
                         PropertyInfo[] strengthproperties = typeof(FieldConcreteStrengthDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
                         PropertyInfo[] strengthRowsproperties = typeof(FieldConcreteStrengthRowDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
                         tbl = ConvertDataService.ConvertToTable<FieldConcreteStrengthDataset>(strengthResult.Value, strengthproperties, strengthRowsproperties);
-                    }else{
+                    }
+                    else
+                    {
                         Console.WriteLine(strengthResult.Error);
                     }
                     break;
@@ -93,10 +94,12 @@ namespace API.Services.ConcreteService
                         PropertyInfo[] mixproperties = typeof(FieldConcreteMixNumberDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
                         PropertyInfo[] mixRowsproperties = typeof(FieldConcreteMixNumberRowDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
                         tbl = ConvertDataService.ConvertToTable<FieldConcreteMixNumberDataset>(mixResult.Value, mixproperties, mixRowsproperties);
-                    }else{
+                    }
+                    else
+                    {
                         Console.WriteLine(mixResult.Error);
                     }
-                    
+
                     break;
             }
 
@@ -119,7 +122,7 @@ namespace API.Services.ConcreteService
                 {
                     PropertyInfo[] props = typeof(FieldConcreteDatumFlattenDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
                     PropertyInfo[] rowProps = typeof(FieldConcreteDatumTestRowDataset).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                    
+
                     tbl = ConvertDataService.ConvertToTable<FieldConcreteDatumFlattenDataset>(dataResult.Value, props, rowProps);
                     result.IsSuccess = true;
                     result.Value = ConvertDataService.FromTableToExcel(tbl);
@@ -169,7 +172,7 @@ namespace API.Services.ConcreteService
 
         public string getUrl(int projectId, int dataset)
         {
-            return $"{baseUrl}?projectId={projectId}&dataset={dataset}";
+            return $"{_baseUrl}?projectId={projectId}&dataset={dataset}";
         }
     }
 }

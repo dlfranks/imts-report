@@ -1,6 +1,7 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using API.Models.User;
+using API.DTOs;
 using API.Services;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
@@ -44,18 +45,28 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDto)
+        public async Task<ActionResult<UserDTO>> Create(RegisterDTO registerDto)
         {
-            if(await _userManager.Users.AnyAsync(x => x.Email == registerDto.Email))
+            var currentUser = await _userManager.GetUserAsync(User);
+            //permissionForEmployee()
+            
+            var claims = await _userManager.GetClaimsAsync(currentUser);
+            var officeId = claims.FirstOrDefault(c => c.Type == "officeId");
+            //validate an email
+            if (await _userManager.Users.AnyAsync(x => x.Email == registerDto.Email))
             {
                 ModelState.AddModelError("email", "Email taken");
                 return ValidationProblem();
             }
-            if(await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Email))
+            //Validate the username
+            if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Email))
             {
                 ModelState.AddModelError("username", "Username taken");
                 return ValidationProblem();
             }
+            //Validate the user role for create a new user
+
+
 
             var user = new AppUser
             {
@@ -64,12 +75,12 @@ namespace API.Controllers
                 Email = registerDto.Email,
                 UserName = registerDto.Email,
                 IsWoodEmployee = registerDto.IsWoodEmployee,
-                OfficeId = registerDto.OfficeId
+                MainOfficeId = officeId
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
 
-            if(result.Succeeded)
+            if (result.Succeeded)
             {
                 return CreateUserObject(user);
             }
@@ -89,6 +100,7 @@ namespace API.Controllers
         {
             return new UserDTO
             {
+                OfficeId = user.MainOfficeId,
                 DisplayName = user.FirstName + " " + user.LastName,
                 //Image = null,
                 Token = _tokenService.CreateToken(user),

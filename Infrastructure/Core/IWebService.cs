@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using API.Models.Core;
+using Application.Core;
 
-namespace API.Services
+namespace Infrastructure.Core
 {
     public interface IWebService<T>
     {

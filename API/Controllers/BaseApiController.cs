@@ -1,6 +1,6 @@
 using System;
 using System.Text.Json;
-using API.Models.Core;
+using Application.Core;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;

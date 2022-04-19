@@ -1,4 +1,4 @@
-namespace API.Models.Core
+namespace API.DTOs
 {
     public class ProjectViewModel
     {

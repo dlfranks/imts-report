@@ -1,13 +1,10 @@
-using System.Collections.Generic;
-using API.Models.FieldConcreteTest;
-using API.Services;
 using API.Services.ConcreteService;
-
+using Infrastructure.Imts;
+using Infrastructure.Imts.ConnectionService;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
 using Persistence;
 
 namespace API.Extentions
@@ -44,7 +41,8 @@ namespace API.Extentions
             services.AddHttpClient();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<ConcreteService>();
-            
+            services.Configure<ImtsSettings>(config.GetSection("Imts"));
+
             services.AddMvc().AddNewtonsoftJson();
             return services;
         }

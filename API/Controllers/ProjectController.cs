@@ -1,7 +1,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using API.Models.Core;
+using API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;

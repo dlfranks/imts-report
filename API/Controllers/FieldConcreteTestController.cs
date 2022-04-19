@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
-using API.Models.Core;
-using API.Models.FieldConcreteTest;
+using Application.FieldConcreteTest;
 using API.Services;
 using API.Services.ConcreteService;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Infrastructure.Imts.ConnectionService;
 
 namespace API.Controllers
 {

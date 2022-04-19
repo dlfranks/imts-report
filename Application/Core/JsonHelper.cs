@@ -3,7 +3,7 @@ using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace API.Helper
+namespace Application.Core
 {
     public class TimeSpanToStringConverter : JsonConverter<TimeSpan>
     {

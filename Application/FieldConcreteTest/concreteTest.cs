@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using API.Helper;
-using API.Models.Core;
+using Application.Core;
 
-namespace API.Models.FieldConcreteTest
+
+namespace Application.FieldConcreteTest
 {
     public enum FieldConcreteDatasetEnum
     {
@@ -14,7 +14,7 @@ namespace API.Models.FieldConcreteTest
         Strength,
         MixNumber,
 
-    }
+    }   
     public abstract class FieldConcreteSampleDataset
     {
 

@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Net.Http;
-using API.Models.FieldConcreteTest;
+using Application.FieldConcreteTest;
+using Infrastructure.Core;
 
-namespace API.Services
+namespace Infrastructure.Imts.ConnectionService
 {
     public class ConnectionService : IConnectionService
     {

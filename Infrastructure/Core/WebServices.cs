@@ -1,12 +1,10 @@
 using System;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using API.Helper;
-using API.Models.Core;
+using Application.Core;
 
-namespace API.Services
+namespace Infrastructure.Core
 {
     public class WebService<T> : IWebService<T>
     {

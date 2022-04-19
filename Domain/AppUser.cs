@@ -7,7 +7,7 @@ namespace Domain
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool IsWoodEmployee { get; set; }
-        public int OfficeId { get; set; }
+        public int MainOfficeId { get; set; }
 
 
 
