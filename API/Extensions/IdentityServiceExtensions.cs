@@ -8,19 +8,23 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
 
-namespace API.Extentions
+namespace API.Extensions
 {
-    public static class IdentityServiceExtentions
+    public static class IdentityServiceExtensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddIdentityCore<AppUser>(opt =>
+            services.AddIdentityCore<AppUser>(opts =>
             {
-                opt.Password.RequireNonAlphanumeric = false;
+                opts.Password.RequiredLength = 8;
+                //opts.Password.RequireNonAlphanumeric = true;
+                //opts.Password.RequireLowercase = false;
+                //opts.Password.RequireUppercase = true;
+                //opts.Password.RequireDigit = true;
 
             })
             .AddEntityFrameworkStores<AppContext>()
-            .AddSignInManager<SignInManager<AppUser>>();
+            .AddSignInManager<AuthSignInManager<AppUser>>();
 
 
 
@@ -38,7 +42,7 @@ namespace API.Extentions
                 };
             });
             services.AddScoped<TokenService>();
-            
+            services.AddScoped<SignInManager<AppUser>, AuthSignInManager<AppUser>>();
 
             return services;
         }

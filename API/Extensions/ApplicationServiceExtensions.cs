@@ -7,9 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence;
 
-namespace API.Extentions
+namespace API.Extensions
 {
-    public static class ApplicationServiceExtentions
+    public static class ApplicationServiceExtensions
     {
         public static IServiceCollection ApplicationServices(this IServiceCollection services, IConfiguration config)
         {
@@ -42,6 +42,7 @@ namespace API.Extentions
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<ConcreteService>();
             services.Configure<ImtsSettings>(config.GetSection("Imts"));
+            
 
             services.AddMvc().AddNewtonsoftJson();
             return services;
