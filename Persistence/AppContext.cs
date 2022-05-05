@@ -1,4 +1,5 @@
 using Domain;
+using Domain.imts;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,8 @@ namespace Persistence
         {
 
         }
+
+        public DbSet<OfficeRole> OfficeRoles { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
