@@ -23,7 +23,11 @@ namespace Persistence
             builder.Entity<Project>().Property(c => c.id).HasColumnName("projectId");
             builder.Entity<Office>().Property(c => c.id).HasColumnName("officeId");
             builder.Entity<UsersInOfficeRole>().HasKey(q => new { q.officeId, q.userRoleId, q.employeeId });
-            
+            builder.Entity<UsersInOfficeRole>().HasOne(o => o.office).WithMany().HasForeignKey(o => o.officeId);
+            builder.Entity<UsersInOfficeRole>().HasOne(o => o.employee).WithMany().HasForeignKey(o => o.employeeId);
+            builder.Entity<UsersInOfficeRole>().HasOne(o => o.userRole).WithMany().HasForeignKey(o => o.userRoleId);
+
+            builder.Entity<Employee>().Property(e => e.id).HasColumnName("employeeId");
         }
 
     }

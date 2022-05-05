@@ -20,7 +20,9 @@ namespace Persistence
                         LastName = "Franks",
                         Email = "deana.franks@woodplc.com",
                         UserName = "deana.franks@woodplc.com",
-                        IsWoodEmployee = true,
+                        IsImtsUser = true,
+                        MainOfficeId = 1,
+
                     },
                     new AppUser
                     {
@@ -28,7 +30,7 @@ namespace Persistence
                         LastName = "Jane",
                         Email = "jane@test.com",
                         UserName = "jane@test.com",
-                        IsWoodEmployee = false,
+                        IsImtsUser = false,
                     },
 
                 };
@@ -38,6 +40,8 @@ namespace Persistence
                     await userManager.CreateAsync(user, "Pa$$w0rd");
                 }
             }
+            if(context.Asp)
+            
         }
     }
 }

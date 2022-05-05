@@ -2,6 +2,7 @@ using System;
 using System.Text.Json;
 using Application.Core;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,18 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        protected EntityScope scope;
+        public BaseApiController(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            var methos = httpContextAccessor.HttpContext.Request.Method;
+            //scope.officeId = Int32.Parse(httpContextAccessor.HttpContext.Request.Headers["OfficeId"].ToString());
+            //scope = new EntityScope();
+            //scope.officeId = 1;
+
+
+        }
         private IMediator _mediator;
 
         protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
@@ -64,6 +77,6 @@ namespace API.Controllers
             return BadRequest(result.Error);
         }
 
-        
+
     }
 }

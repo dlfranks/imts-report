@@ -22,17 +22,6 @@ namespace Domain.imts
         public int id { get; set; }
         public string roleName { get; set; }
     }
-
-    public class UsersInOfficeRole
-    {
-        public int userRoleId { get; set; }
-        public UserOfficeRole userRole { get; set; }
-        public int employeeId { get; set; }
-        public Employee employee { get; set; }
-        //Users have roles by office
-        public int officeId { get; set; }
-        public Office office { get; set; }
-    }
     public class Office
     {
         public int id { get; set; }
@@ -40,6 +29,18 @@ namespace Domain.imts
         public int unitSystem { get; set; }         //Enum UnitSystem
         public int region { get; set; }             //Enum OfficeRegion
     }
+
+    public class UsersInOfficeRole
+    {
+        public int userRoleId { get; set; }
+        public virtual UserOfficeRole userRole { get; set; }
+        public int employeeId { get; set; }
+        public virtual Employee employee { get; set; }
+        //Users have roles by office
+        public int officeId { get; set; }
+        public virtual Office office { get; set; }
+    }
+    
     public class Project
     {
         public int id { get; set; }

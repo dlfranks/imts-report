@@ -24,7 +24,7 @@ namespace API.Extensions
 
             })
             .AddEntityFrameworkStores<AppContext>()
-            .AddSignInManager<AuthSignInManager<AppUser>>();
+            .AddSignInManager<SignInManager<AppUser>>();
 
 
 
@@ -42,7 +42,7 @@ namespace API.Extensions
                 };
             });
             services.AddScoped<TokenService>();
-            services.AddScoped<SignInManager<AppUser>, AuthSignInManager<AppUser>>();
+            services.AddScoped<UserService>();
 
             return services;
         }
