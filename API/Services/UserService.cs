@@ -88,37 +88,68 @@ namespace API.Services
 
     public class UserService
     {
-        private readonly UserManager<AppUser> _userManager;
         private readonly ImtsContext _imtsContext;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly TokenService _tokenService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
+        private IEntityScope _Scope;
         public UserService(
-            UserManager<AppUser> userManager,
+            IUnitOfWork unitOfWork,
+            IHttpContextAccessor httpContextAccessor,
             ImtsContext imtsContext,
-            IHttpContextAccessor httpContextAccessor
-
+            UserManager<AppUser> userManager, 
+            TokenService tokenService
         )
         {
-            _userManager = userManager;
             _imtsContext = imtsContext;
+            _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
+            _tokenService = tokenService;
         }
-        public UserService(EntityScope scope)
-        {
-            this.Scope = scope;
-
-        }
-        public EntityScope Scope { get; set; }
         
-
-        public void SwitchOffice(int officeId)
+        public IEntityScope Scope
         {
-            Scope.officeId = officeId;
+            get
+            {
+                var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                if (token != null)
+                {
+                    var officeId = _tokenService.ValidateJwtToken(token);
+                    if (officeId != null && officeId > 0)
+                    {
+                        _Scope = new EntityScope();
+                        _Scope.officeId = officeId ?? 0;
+                        return _Scope;
+                    }
+
+                }
+                return null;
+
+            }
+            set
+            {
+                _Scope = new EntityScope();
+                _Scope.officeId = value.officeId;
+            }
         }
+
+
+        public IEntityScope SwitchOffice(int officeId)
+        {
+            if(_Scope == null)
+                _Scope = new EntityScope();
+            _Scope.officeId = officeId;
+            return _Scope;
+        }
+
+        
 
         public async Task<Result<AppUser>> CreateUser(RegisterDTO registerDto)
         {
-            var employeeResult = await GetImtsUserByUserName(registerDto.Email);
+            List<string> errors = new List<string>();
+            Employee imtsUser = null;
 
             var user = new AppUser
             {
@@ -127,23 +158,30 @@ namespace API.Services
                 Email = registerDto.Email,
                 UserName = registerDto.Email,
                 MainOfficeId = Scope.officeId,
-                IsImtsUser = false
+                IsImtsUser = registerDto.IsImtsUser
             };
-            //Imts user
-            if (employeeResult.IsSuccess)
+
+            if (registerDto.IsImtsUser)
             {
-                user.MainOfficeId = employeeResult.Value.mainOfficeId;
-                user.ImtsUserName = employeeResult.Value.userName;
-                user.IsImtsUser = true;
-                user.ImtsEmployeeId = employeeResult.Value.id;
+                var employeeResult = await GetImtsUserByUserName(registerDto.Email);
+                imtsUser = employeeResult.Value;
+                if (employeeResult.IsSuccess)
+                {
+                    user.MainOfficeId = employeeResult.Value.mainOfficeId;
+                    user.ImtsUserName = employeeResult.Value.userName;
+                    user.IsImtsUser = true;
+                    user.ImtsEmployeeId = employeeResult.Value.id;
+                }
             }
 
-
+            //create AppUser
             var result = await _userManager.CreateAsync(user, registerDto.Password);
+            //Create a role to the user
+            await _unitOfWork.Users.addRoleToUser(user, Scope.officeId, registerDto.RoleName);
 
-            if (result.Succeeded)
+
+            if (await _unitOfWork.TryCommit())
             {
-
                 return Result<AppUser>.Success(user);
             }
             else
@@ -265,20 +303,20 @@ namespace API.Services
                 return (false);
             return roles.Contains(role.ToLower());
         }
-        public async Task<bool> permissionForEmployee(PermissionAction action, string userId=null, bool autoThrow = false)
+        public async Task<bool> permissionForEmployee(PermissionAction action, string userId = null, bool autoThrow = false)
         {
             //Only Imts users can create users of this app;
             var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
             if (currentUser == null) return false;
             Employee currentEmployee = await GetImtsUserById(currentUser.ImtsEmployeeId);
             AppUser appUser = null; Employee appUserEmployee = null;
-            if(!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId))
                 appUser = await _userManager.Users.Where(q => q.Id == userId).FirstOrDefaultAsync();
-            
-            if(appUser != null && appUser.ImtsEmployeeId > 0)
+
+            if (appUser != null && appUser.ImtsEmployeeId > 0)
                 appUserEmployee = await GetImtsUserById(appUser.ImtsEmployeeId);
-            
-            
+
+
             //Can't delete yourself no matter who you are
             if (currentUser.Id == appUser.Id && action == PermissionAction.Delete)
             {

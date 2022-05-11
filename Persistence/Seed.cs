@@ -40,8 +40,29 @@ namespace Persistence
                     await userManager.CreateAsync(user, "Pa$$w0rd");
                 }
             }
-            
-            
+            if (!context.OfficeRoles.Any())
+            {
+                var roles = new List<OfficeRole>
+                {
+                    new OfficeRole
+                    {
+                        RoleName="super"
+                    },
+                    new OfficeRole
+                    {
+                        RoleName="administrator"
+                    },
+                    new OfficeRole
+                    {
+                        RoleName="user"
+                    },
+                };
+
+                await context.AddRangeAsync(roles);
+                await context.SaveChangesAsync();
+
+            }
+
         }
     }
 }

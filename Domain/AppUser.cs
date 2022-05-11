@@ -2,22 +2,34 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Domain
 {
+    public interface IEntity
+    {
+        int Id { get; }
+    }
+    public interface IEntityScope
+    {
+        int officeId { get; set; }
+    }
     public enum Roles
     {
         Administrator = 1,
         User
     }
-    public class Role
+    public class EntityScope : IEntityScope
     {
-        public int id { get; set; }
-        public string roleName { get; set; }
+        public int officeId { get; set; }
+    }
+    public class OfficeRole : IEntity
+    {
+        public int Id { get; set; }
+
+        public string RoleName { get; set; }
     }
 	
-	
-	public class AppUserRole
+	public class AppUserOfficeRole
     {
         public int RoleId { get; set; }
-        public virtual Role Role { get; set; }
+        public virtual OfficeRole Role { get; set; }
         public string AppuserId { get; set; }
         public virtual AppUser AppUser { get; set; }
         //Users have roles by office

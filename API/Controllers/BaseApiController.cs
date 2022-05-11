@@ -1,6 +1,8 @@
 using System;
 using System.Text.Json;
+using API.Services;
 using Application.Core;
+using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,17 +14,16 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        protected EntityScope scope;
-        public BaseApiController(IHttpContextAccessor httpContextAccessor)
+        protected readonly TokenService _tokenService;
+        protected readonly UserService _userService;
+
+        protected IEntityScope _scope;
+        public BaseApiController(
+            UserService userService,
+            IEntityScope scope)
         {
-            _httpContextAccessor = httpContextAccessor;
-            var methos = httpContextAccessor.HttpContext.Request.Method;
-            //scope.officeId = Int32.Parse(httpContextAccessor.HttpContext.Request.Headers["OfficeId"].ToString());
-            //scope = new EntityScope();
-            //scope.officeId = 1;
-
-
+            _userService = userService;
+            _scope = scope;
         }
         private IMediator _mediator;
 

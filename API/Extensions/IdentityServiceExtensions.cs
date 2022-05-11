@@ -40,9 +40,12 @@ namespace API.Extensions
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+                
             });
+            
             services.AddScoped<TokenService>();
             services.AddScoped<UserService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

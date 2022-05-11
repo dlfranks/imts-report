@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Services;
+using Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +14,11 @@ namespace API.Controllers
     public class ProjectController : BaseApiController
     {
         private readonly ImtsContext _imtsContext;
-        public ProjectController(ImtsContext imtsContext,
-             IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+        public ProjectController(
+            ImtsContext imtsContext,
+            IEntityScope scope,
+            UserService userService)
+            :base(userService, scope)
         {
             _imtsContext = imtsContext;
         }

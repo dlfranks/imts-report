@@ -5,7 +5,6 @@ namespace API.DTOs
 {
     public class UserDTO
     {
-        public int MainOfficeId { get; set; }
         public int CurrentOfficeId { get; set;}
         public string DisplayName { get; set; }
         public string Token { get; set; }

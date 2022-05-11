@@ -26,5 +26,5 @@ namespace Domain.imts
         public bool active { get; set; }
     }
 
-    
+
 }

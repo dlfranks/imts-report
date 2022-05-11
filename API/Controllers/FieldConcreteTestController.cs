@@ -5,7 +5,7 @@ using API.Services;
 using API.Services.ConcreteService;
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Imts.ConnectionService;
-using Microsoft.AspNetCore.Http;
+using Domain;
 
 namespace API.Controllers
 {
@@ -14,15 +14,22 @@ namespace API.Controllers
     {
         private readonly IConnectionService _connectionService;
         private readonly ConcreteService _concreteService;
+
+
+        
+        public UserService UserService { get; }
+
+
         public FieldConcreteTestController(
-            IConnectionService connectionService, 
+            IConnectionService connectionService,
             ConcreteService concreteService,
-            IHttpContextAccessor httpConctextAccessor) : base(httpConctextAccessor)
+            UserService userService,
+            IEntityScope scope) : base(userService, scope)
         {
             _concreteService = concreteService;
             _connectionService = connectionService;
         }
-        
+
         [Route("samples")]
         [HttpGet]
         public async Task<IActionResult> sampleDatasets()
@@ -30,7 +37,7 @@ namespace API.Controllers
             int projectId = 6754;
             int length = Enum.GetNames(typeof(FieldConcreteDatasetEnum)).Length;
 
-            
+
             string jsonString = await _concreteService.getSamples();
             var date = DateTime.Now;
             var dateString = date.Month.ToString() + "-" + date.Day.ToString() + "-" + date.Year.ToString();

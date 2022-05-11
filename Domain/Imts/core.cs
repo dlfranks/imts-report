@@ -1,6 +1,6 @@
 using Domain.imts;
 
-namespace API.Models
+namespace Domain.imts
 {
     public class IDValuePair
     {
@@ -41,6 +41,15 @@ namespace API.Models
         public string name { get; set; }
         public int unitSystem { get; set; }         //Enum UnitSystem
         public int region { get; set; }             //Enum OfficeRegion
+    }
+    public class Project
+    {
+        public int id { get; set; }
+
+        public int officeId { get; set; }
+        public virtual Office office { get; set; }
+        public string projectNo { get; set; }
+        public string name { get; set; }
     }
 
 }

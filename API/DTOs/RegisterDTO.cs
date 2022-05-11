@@ -8,7 +8,7 @@ namespace API.DTOs
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
-        public bool IsWoodEmployee { get; set; }
+        public bool IsImtsUser { get; set; } = false;
         [Required]
         [EmailAddress]
         public string Email { get; set; }
@@ -17,6 +17,8 @@ namespace API.DTOs
         public string Password { get; set; }
 
         public int CurrentOfficeId { get; set; }
+        [Required]
+        public string RoleName { get; set; }
 
     }
 }

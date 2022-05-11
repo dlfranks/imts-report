@@ -9,8 +9,5 @@ namespace Application.Core
         public static Result<T> Failure(string error) => new Result<T> { IsSuccess = false, Error = error };
     }
 
-    public class EntityScope
-    {
-        public int officeId { get; set; }
-    }
+    
 }
