@@ -12,14 +12,14 @@ namespace Persistence
 
         }
         public DbSet<OfficeRole> OfficeRoles { get; set; }
-        public DbSet<AppUserOfficeRole> AppUserRoles { get; set; }
+        public DbSet<AppUserOfficeRole> AppUserOfficeRoles { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.Entity<OfficeRole>().HasIndex(q => q.RoleName).IsClustered(false);
-            builder.Entity<AppUserOfficeRole>().HasKey(q => new { q.AppuserId, q.ImtsOfficeId });
+            builder.Entity<AppUserOfficeRole>().HasKey(q => new { q.AppUserId, q.RoleId, q.ImtsOfficeId });
 
         }
     }

@@ -71,13 +71,19 @@ namespace Persistence
         protected readonly DbSet<OfficeRole> _OfficeRole;
         protected readonly DbSet<AppUserOfficeRole> _AppUserOfficeRole;
         private readonly AppContext _context;
+        private readonly ImtsContext _imtsContext;
         private readonly ILogger _logger;
         protected readonly UserManager<AppUser> _UserManager;
-        public UserRepository(AppContext context, ILogger logger, UserManager<AppUser> userManager)
+        public UserRepository(
+            AppContext context,
+            ImtsContext imtsContext,
+            ILogger logger,
+            UserManager<AppUser> userManager)
         {
             _OfficeRole = context.OfficeRoles;
-            _AppUserOfficeRole = context.AppUserRoles;
+            _AppUserOfficeRole = context.AppUserOfficeRoles;
             _context = context;
+            _imtsContext = imtsContext;
             _logger = logger;
             _UserManager = userManager;
         }
@@ -88,7 +94,7 @@ namespace Persistence
             var _roleId = await _OfficeRole.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
             _AppUserOfficeRole.Add(new AppUserOfficeRole
             {
-                AppuserId = appUserId,
+                AppUserId = appUserId,
                 RoleId = _roleId,
                 ImtsOfficeId = officeId
             });
@@ -116,8 +122,9 @@ namespace Persistence
         }
         public IQueryable<AppUserOfficeRole> getUsersRoles(string appUserId)
         {
-            return _AppUserOfficeRole.Where(q => q.AppuserId == appUserId);
+            return _AppUserOfficeRole.Where(q => q.AppUserId == appUserId).Include(q => q.Role);
         }
+
         public async Task<OfficeRole> getOfficeRole(string roleName)
         {
             return await _OfficeRole.Where(q => q.RoleName == roleName).FirstAsync();
@@ -126,7 +133,7 @@ namespace Persistence
         public async Task removeRoleFromUser(string appUserId, int officeId, string roleName)
         {
             var role = await getOfficeRole(roleName);
-            var appUserOfficeRole = await _context.AppUserRoles.Where(q => q.AppuserId == appUserId && q.RoleId == role.Id).FirstOrDefaultAsync();
+            var appUserOfficeRole = await _context.AppUserOfficeRoles.Where(q => q.AppUserId == appUserId && q.RoleId == role.Id).FirstOrDefaultAsync();
             _AppUserOfficeRole.Remove(appUserOfficeRole);
         }
 

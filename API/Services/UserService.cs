@@ -4,51 +4,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Middleware;
+using API.Services.Interfaces;
 using API.Services.Models;
+using API.ViewModels;
 using Application.Core;
 using Domain;
 using Domain.imts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Persistence;
 
 namespace API.Services.Models
 {
     public class UserSetting
     {
-        public string[] roles { get; set; }
+        public string appUserId { get; set; }
+        public string currentOfficeRoleName { get; set; }
+        public int currentOfficeId { get; set; }
         public string userName { get; set; }
         public string fullName { get; set; }
         public string email { get; set; }
-        public int? officeId { get; set; }
-        public string officeName { get; set; }
-        public UnitSystem officeUnitSystem { get; set; }
-        public OfficeRegion officeRegion { get; set; }
-        public int? employeeId { get; set; }
-        public bool _isProjectManager { get; set; }
-        public bool isProjectManager
-        {
-            get
-            {
-                return (isAuthenticated && _isProjectManager);
-            }
-        }
-
-        public bool _isProjectEngineer { get; set; }
-        public bool isProjectEngineer
-        {
-            get
-            {
-                return (isAuthenticated && _isProjectEngineer);
-            }
-        }
+        public int? mainOfficeId { get; set; }
+        public string mainOfficeName { get; set; }
+        public bool IsImtsUser { get; set; }
+        public int? imtsEmployeeId { get; set; }
 
         public bool isAuthenticated
         {
             get
             {
-                return (employeeId.HasValue);
+                return (!string.IsNullOrEmpty(appUserId));
             }
         }
 
@@ -61,19 +49,20 @@ namespace API.Services.Models
             }
         }
 
-        public bool isInRole(string role)
+        public bool isUserInOffice(int officeId)
         {
             if (!isAuthenticated)
                 return (false);
-            if (roles == null)
+            if (officeId <= 0)
                 return (false);
-            if (String.IsNullOrWhiteSpace(role))
-                return (false);
-            return roles.Contains(role.ToLower());
+            if(_memberOffices == null)
+                return false;
+            
+            return _memberOffices.Where(q => q.OfficeId == officeId).Count() > 0;
         }
 
-        public List<IDValuePair> _memberOffices { get; set; }
-        public List<IDValuePair> memberOffices
+        public List<AppUserOfficeRoleViewModel> _memberOffices { get; set; }
+        public List<AppUserOfficeRoleViewModel> memberOffices
         {
             get
             {
@@ -90,76 +79,82 @@ namespace API.Services
     {
         private readonly ImtsContext _imtsContext;
         private readonly UserManager<AppUser> _userManager;
-        private readonly TokenService _tokenService;
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private IEntityScope _Scope;
+
+
         public UserService(
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,
             ImtsContext imtsContext,
-            UserManager<AppUser> userManager, 
-            TokenService tokenService
+            UserManager<AppUser> userManager
+
         )
         {
             _imtsContext = imtsContext;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
-            _tokenService = tokenService;
+
         }
+
         
-        public IEntityScope Scope
+
+        public async Task<UserSetting> CreateUserSettings()
         {
-            get
-            {
-                var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-                if (token != null)
+            var currentUserSetting =  (UserSetting)_httpContextAccessor.HttpContext.Items["CurrentUserSettings"];
+            if(currentUserSetting != null) return currentUserSetting;
+            var us = new UserSetting();
+            var userId = _httpContextAccessor.HttpContext.Items["UserId"].ToString();
+            us.currentOfficeId = int.Parse(_httpContextAccessor.HttpContext.Items["OfficeId"].ToString());
+            var CurrentUserSettings = (UserSetting)_httpContextAccessor.HttpContext.Items["CurrentUserSettings"];
+            var appUser = await _userManager.Users.FirstOrDefaultAsync(q => q.Id == userId);
+            var appUserOfficeRoles = await getUserOfficeRoles(userId);
+            var currentOfficeRole = appUserOfficeRoles.Where(q => q.ImtsOfficeId == us.currentOfficeId).FirstOrDefault();
+
+            us.appUserId = userId;
+            us.email = appUser.Email;
+            us.fullName = appUser.FirstName + " " + appUser.LastName;
+            us.currentOfficeRoleName = currentOfficeRole.Role.RoleName;
+            var isUserInRoleInOffice = appUserOfficeRoles.Where(q => q.ImtsOfficeId == appUser.MainOfficeId
+                && q.Role.RoleName == OfficeRoleEnum.Super.ToString().ToLower()).ToList();
+
+            us._isSuperUser = isUserInRoleInOffice.Count > 0;
+            us._memberOffices = appUserOfficeRoles.Select(q => new AppUserOfficeRoleViewModel
                 {
-                    var officeId = _tokenService.ValidateJwtToken(token);
-                    if (officeId != null && officeId > 0)
-                    {
-                        _Scope = new EntityScope();
-                        _Scope.officeId = officeId ?? 0;
-                        return _Scope;
-                    }
+                    UserId = q.AppUserId,
+                    OfficeId = q.ImtsOfficeId,
+                    OfficeName = q.ImtsOffice.name,
+                    RoleId = q.RoleId,
+                    RoleName = q.Role.RoleName 
+                    }).ToList();
+            us.imtsEmployeeId = appUser.ImtsEmployeeId;
+            us.IsImtsUser = appUser.IsImtsUser;
+            CurrentUserSettings = us;
 
-                }
-                return null;
+            return us;
 
-            }
-            set
-            {
-                _Scope = new EntityScope();
-                _Scope.officeId = value.officeId;
-            }
         }
-
-
-        public IEntityScope SwitchOffice(int officeId)
+        public void RemoveUserSetting()
         {
-            if(_Scope == null)
-                _Scope = new EntityScope();
-            _Scope.officeId = officeId;
-            return _Scope;
+            _httpContextAccessor.HttpContext.Items["CurrentUserSettings"] = null;
         }
-
         
-
-        public async Task<Result<AppUser>> CreateUser(RegisterDTO registerDto)
+        public async Task<Result<AppUser>> CreateUser(RegisterDTO registerDto, int officeId)
         {
             List<string> errors = new List<string>();
             Employee imtsUser = null;
+            AppUser user = new AppUser();
+            user = await _userManager.FindByNameAsync(registerDto.Email);
 
-            var user = new AppUser
-            {
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                Email = registerDto.Email,
-                UserName = registerDto.Email,
-                MainOfficeId = Scope.officeId,
-                IsImtsUser = registerDto.IsImtsUser
-            };
+            user.FirstName = registerDto.FirstName;
+            user.LastName = registerDto.LastName;
+            user.Email = registerDto.Email;
+            user.UserName = registerDto.Email;
+            user.IsImtsUser = registerDto.IsImtsUser;
+            user.MainOfficeId = officeId;
+
 
             if (registerDto.IsImtsUser)
             {
@@ -177,7 +172,7 @@ namespace API.Services
             //create AppUser
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             //Create a role to the user
-            await _unitOfWork.Users.addRoleToUser(user, Scope.officeId, registerDto.RoleName);
+            await _unitOfWork.Users.addRoleToUser(user, officeId, registerDto.RoleName);
 
 
             if (await _unitOfWork.TryCommit())
@@ -188,6 +183,28 @@ namespace API.Services
             {
                 return Result<AppUser>.Failure("Failed to create a user.");
             }
+        }
+
+        public async Task<IEnumerable<AppUserOfficeRole>> getUserOfficeRoles(string appUserId)
+        {
+            var userOfficesRoles = await _unitOfWork.Users.getUsersRoles(appUserId).ToListAsync();
+            var imtsOffices = await _imtsContext.Offices.ToListAsync();
+            foreach (var uor in userOfficesRoles)
+            {
+                var o = imtsOffices.Where(q => q.id == uor.ImtsOfficeId).First();
+                if (o != null)
+                    uor.ImtsOffice = o;
+            }
+            return userOfficesRoles;
+        }
+        public async Task<AppUserOfficeRole> getUserOfficeRole(string appUserId, int officeId)
+        {
+            var userOfficesRole = await _unitOfWork.Users.getUsersRoles(appUserId).Where(q => q.ImtsOfficeId == officeId).FirstOrDefaultAsync();
+            var o = await _imtsContext.Offices.Where(q => q.id == userOfficesRole.ImtsOfficeId).FirstAsync();
+            if (o != null)
+                userOfficesRole.ImtsOffice = o;
+
+            return userOfficesRole;
         }
         public async Task<List<IDValuePair>> GetUserOffices(AppUser user)
         {
@@ -228,6 +245,14 @@ namespace API.Services
             if (employee == null) return null;
             return employee;
         }
+        public async Task<bool> IsImtsUser(string userName)
+        {
+            var imtsUser = await GetImtsUserByUserName(userName);
+            if(imtsUser != null)
+                return true;
+            else return false;
+        }
+
         public async Task<Result<Employee>> GetImtsUserByUserName(string userName)
         {
 
@@ -294,42 +319,28 @@ namespace API.Services
         {
             return await UserRolesInOffice(employeeId, officeId).Select(q => q.userRole.roleName).ToArrayAsync();
         }
-        public async Task<bool> IsInRoles(AppUser user, string role)
-        {
-            var roles = await GetUserRolesInOffice(user.ImtsEmployeeId, Scope.officeId);
-            if (roles == null)
-                return (false);
-            if (String.IsNullOrWhiteSpace(role))
-                return (false);
-            return roles.Contains(role.ToLower());
-        }
+        
         public async Task<bool> permissionForEmployee(PermissionAction action, string userId = null, bool autoThrow = false)
         {
             //Only Imts users can create users of this app;
-            var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+            var currentUser = await CreateUserSettings();
             if (currentUser == null) return false;
-            Employee currentEmployee = await GetImtsUserById(currentUser.ImtsEmployeeId);
-            AppUser appUser = null; Employee appUserEmployee = null;
-            if (!string.IsNullOrEmpty(userId))
-                appUser = await _userManager.Users.Where(q => q.Id == userId).FirstOrDefaultAsync();
-
-            if (appUser != null && appUser.ImtsEmployeeId > 0)
-                appUserEmployee = await GetImtsUserById(appUser.ImtsEmployeeId);
-
-
+            
+            
             //Can't delete yourself no matter who you are
-            if (currentUser.Id == appUser.Id && action == PermissionAction.Delete)
+            if (currentUser.appUserId == userId && action == PermissionAction.Delete)
             {
-                if (autoThrow) throw new InvalidOperationException("User " + currentUser.UserName + " does not have permission to " + action.ToString() + " on employee " + appUser.Email.ToString());
+                if (autoThrow) throw new InvalidOperationException("User " + currentUser.userName + " does not have permission to " + action.ToString() + " on employee " + userId);
                 return (false);
             }
 
             //Can do anything else to yourself
-            if (currentUser.Id == appUser.Id) return (true);
+            if (currentUser.appUserId == userId) return (true);
             //Otherwise only these guys have permission to do anything else
-            if (currentEmployee.isSuperUser || await IsInRoles(currentUser, "Office Administrator")) return (true);
+            if (currentUser.isSuperUser || currentUser.currentOfficeRoleName == OfficeRoleEnum.Administrator.ToString().ToLower())
+                return true;
 
-            if (autoThrow) throw new InvalidOperationException("User " + currentUser.Email + " does not have permission to " + action.ToString() + " on employee " + appUser.Email.ToString());
+            if (autoThrow) throw new InvalidOperationException("User " + currentUser.userName + " does not have permission to " + action.ToString() + " on employee " + userId);
             return (false);
         }
 

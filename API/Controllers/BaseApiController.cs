@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using API.Services;
+using API.Services.Interfaces;
 using Application.Core;
 using Domain;
 using MediatR;
@@ -14,16 +15,10 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
-        protected readonly TokenService _tokenService;
         protected readonly UserService _userService;
-
-        protected IEntityScope _scope;
-        public BaseApiController(
-            UserService userService,
-            IEntityScope scope)
+        public BaseApiController(UserService userService)
         {
             _userService = userService;
-            _scope = scope;
         }
         private IMediator _mediator;
 

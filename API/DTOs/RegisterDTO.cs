@@ -9,6 +9,7 @@ namespace API.DTOs
         [Required]
         public string LastName { get; set; }
         public bool IsImtsUser { get; set; } = false;
+        public string ImtsUserName { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }

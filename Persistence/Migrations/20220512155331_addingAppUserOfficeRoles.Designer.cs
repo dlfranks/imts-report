@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -10,9 +11,10 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(AppContext))]
-    partial class AppContextModelSnapshot : ModelSnapshot
+    [Migration("20220512155331_addingAppUserOfficeRoles")]
+    partial class addingAppUserOfficeRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
@@ -101,16 +103,16 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.AppUserOfficeRole", b =>
                 {
-                    b.Property<string>("AppUserId")
+                    b.Property<string>("AppuserId")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ImtsOfficeId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("AppUserId", "RoleId", "ImtsOfficeId");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AppuserId", "ImtsOfficeId");
 
                     b.HasIndex("RoleId");
 
@@ -266,7 +268,7 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.AppUser", "AppUser")
                         .WithMany()
-                        .HasForeignKey("AppUserId")
+                        .HasForeignKey("AppuserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

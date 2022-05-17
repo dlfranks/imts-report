@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -42,9 +43,9 @@ namespace API
 
             app.UseRouting();
             app.UseCors("CorsPolicy");
-            app.UseAuthentication();
-            app.UseAuthorization();
-
+            //app.UseAuthentication();
+            //app.UseAuthorization();
+            app.UseMiddleware<JwtMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Services.Models;
 using Domain;
 using Microsoft.AspNetCore.Identity;
@@ -18,5 +19,16 @@ namespace API.Services.Interfaces
 
         Task<bool> ChangePassword(AppUser user, string oldPassword, string newPassword);
         Task<IdentityResult> ResetPassword(AppUser user, string token, string newPassword);
+    }
+
+    public interface ITokenService
+    {
+        Task<AuthenticateResponse> Authenticate(LoginDTO loginDto);
+        string generateJwtToken(AppUser user, int officeId);
+    }
+    public interface IUserService
+    {
+        Task<UserSetting> CreateUserSettings();
+        void RemoveUserSetting();
     }
 }

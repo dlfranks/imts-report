@@ -7,7 +7,8 @@ using API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Persistence;
+using System.Security.Claims;
+using API.Services.Interfaces;
 
 namespace API.Middleware
 {
@@ -27,12 +28,12 @@ namespace API.Middleware
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                attachAccountToContext(context, userService, token);
+                await attachAccountToContext(context, userService, token);
 
             await _next(context);
         }
 
-        private void attachAccountToContext(HttpContext context, UserService userService, string token)
+        private async Task attachAccountToContext(HttpContext context, UserService userService, string token)
         {
             try
             {
@@ -49,12 +50,15 @@ namespace API.Middleware
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var accountId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
-
+                var userId = jwtToken.Claims.First(x => x.Type == "nameid").Value;
+                var officeId = int.Parse(jwtToken.Claims.First(x => x.Type == "officeId").Value);
+                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
                 // attach account to context on successful jwt validation
-                context.Items["User"] = userService.Scope;
+                context.Items["UserId"] = userId;
+                context.Items["OfficeId"] = officeId;
+                context.Items["CurrentUserSettings"] = await userService.CreateUserSettings();
             }
-            catch 
+            catch
             {
                 // do nothing if jwt validation fails
                 // account is not attached to context so request won't have access to secure routes

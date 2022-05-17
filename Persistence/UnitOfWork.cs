@@ -11,8 +11,10 @@ namespace Persistence
         private readonly AppContext _context;
         private readonly ILogger _logger;
         private readonly UserManager<AppUser> _userManager;
-        public UnitOfWork(AppContext context, ILoggerFactory loggerFactory, UserManager<AppUser> userManager)
+        private readonly ImtsContext _imtsContext;
+        public UnitOfWork(AppContext context, ImtsContext imtsContext, ILoggerFactory loggerFactory, UserManager<AppUser> userManager)
         {
+            _imtsContext = imtsContext;
             _context = context;
             _logger = loggerFactory.CreateLogger("logs");
             _userManager = userManager;
@@ -23,9 +25,10 @@ namespace Persistence
 
         public IUserRepository Users
         {
-            get{
-                if(_Users == null)
-                    _Users = new UserRepository(_context, _logger, _userManager);;
+            get
+            {
+                if (_Users == null)
+                    _Users = new UserRepository(_context, _imtsContext, _logger, _userManager); ;
                 return _Users;
             }
         }
@@ -33,8 +36,8 @@ namespace Persistence
         {
             get
             {
-                if(_OfficeRoles == null)
-                    _OfficeRoles = new BaseRepository<OfficeRole>(_context, _logger);;
+                if (_OfficeRoles == null)
+                    _OfficeRoles = new BaseRepository<OfficeRole>(_context, _logger); ;
                 return _OfficeRoles;
             }
         }
@@ -45,16 +48,18 @@ namespace Persistence
         }
         public async Task<bool> TryCommit()
         {
-            try{
+            try
+            {
                 await Commit();
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 //Elmah
                 return false;
             }
             return true;
         }
-        
-        
+
+
     }
 }

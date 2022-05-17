@@ -5,31 +5,55 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using API.DTOs;
+using API.Middleware;
+using API.Services.Interfaces;
 using Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services
 {
-    public class TokenService
+    public class TokenService : ITokenService
     {
-        public IConfiguration _config { get; }
+        private readonly AppSettings _appSettings;
+        private readonly SignInManager<AppUser> _signInManager;
+        private readonly UserManager<AppUser> _userManager;
 
-        public TokenService(IConfiguration config)
+        public TokenService(
+            IOptions<AppSettings> appSettings,
+            SignInManager<AppUser> signInManager,
+            UserManager<AppUser> userManager)
         {
-            _config = config;
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _appSettings = appSettings.Value;
 
         }
-        public string CreateToken(AppUser user)
+        public async Task<AuthenticateResponse> Authenticate(LoginDTO loginDto)
+        {
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+
+            // return null if user not found
+            if (user == null) return null;
+
+            // authentication successful so generate jwt token
+            var token = generateJwtToken(user, user.MainOfficeId);
+
+            return new AuthenticateResponse(user, token);
+        }
+        public string generateJwtToken(AppUser user, int officeId)
         {
             var claims = new List<Claim>{
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim("officeId", 1.ToString()),
+                new Claim("officeId", officeId.ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.Secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDscriptor = new SecurityTokenDescriptor
@@ -46,33 +70,6 @@ namespace API.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public int? ValidateJwtToken(string token)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("[SECRET USED TO SIGN AND VERIFY JWT TOKENS, IT CAN BE ANY STRING]");
-            try
-            {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
 
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var officeId = int.Parse(jwtToken.Claims.First(x => x.Type == "officeId").Value);
-
-                // return account id from JWT token if validation successful
-                return officeId;
-            }
-            catch
-            {
-                // return null if validation fails
-                return null;
-            }
-        }
     }
 }

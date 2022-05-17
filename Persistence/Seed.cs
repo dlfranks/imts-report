@@ -10,36 +10,6 @@ namespace Persistence
     {
         public static async Task SeedData(AppContext context, UserManager<AppUser> userManager)
         {
-            if (!userManager.Users.Any())
-            {
-                var users = new List<AppUser>
-                {
-                    new AppUser
-                    {
-                        FirstName = "Deana",
-                        LastName = "Franks",
-                        Email = "deana.franks@woodplc.com",
-                        UserName = "deana.franks@woodplc.com",
-                        IsImtsUser = true,
-                        MainOfficeId = 1,
-
-                    },
-                    new AppUser
-                    {
-                        FirstName = "Jane",
-                        LastName = "Jane",
-                        Email = "jane@test.com",
-                        UserName = "jane@test.com",
-                        IsImtsUser = false,
-                    },
-
-                };
-
-                foreach (var user in users)
-                {
-                    await userManager.CreateAsync(user, "Pa$$w0rd");
-                }
-            }
             if (!context.OfficeRoles.Any())
             {
                 var roles = new List<OfficeRole>
@@ -62,7 +32,79 @@ namespace Persistence
                 await context.SaveChangesAsync();
 
             }
+            if (!userManager.Users.Any())
+            {
+                var officeList = new List<AppUserOfficeRole>();
+                var users = new List<AppUser>();
+                users.Add(new AppUser
+                {
+                    FirstName = "Deana",
+                    LastName = "Franks",
+                    Email = "deana.franks@woodplc.com",
+                    UserName = "deana.franks@woodplc.com",
+                    IsImtsUser = true,
+                    MainOfficeId = 1,
+
+                });
+
+                officeList.Add(new AppUserOfficeRole
+                {
+                    AppUserId = userManager.Users.Where(q => q.Email == "deana.franks@woodplc.com")
+                            .Select(q => q.Id).First(),
+                    RoleId = context.OfficeRoles.Where(q => q.Id == (int)OfficeRoleEnum.Administrator).Select(q => q.Id).First(),
+                    ImtsOfficeId = 26
+                });
+
+                officeList.Add(new AppUserOfficeRole
+                {
+                    AppUserId = userManager.Users.Where(q => q.Email == "deana.franks@woodplc.com")
+                            .Select(q => q.Id).First(),
+                    RoleId = context.OfficeRoles.Where(q => q.Id == (int)OfficeRoleEnum.User).Select(q => q.Id).First(),
+                    ImtsOfficeId = 11
+                });
+
+                officeList.Add(new AppUserOfficeRole
+                {
+                    AppUserId = userManager.Users.Where(q => q.Email == "deana.franks@woodplc.com")
+                             .Select(q => q.Id).First(),
+                    RoleId = context.OfficeRoles.Where(q => q.Id == (int)OfficeRoleEnum.User).Select(q => q.Id).First(),
+                    ImtsOfficeId = 2
+                });
+
+                users.Add(new AppUser
+                {
+                    FirstName = "Jane",
+                    LastName = "Jane",
+                    Email = "jane@test.com",
+                    UserName = "jane@test.com",
+                    IsImtsUser = false,
+                });
+
+                officeList.Add(new AppUserOfficeRole
+                {
+                    AppUserId = userManager.Users.Where(q => q.Email == "jane@test.com")
+                            .Select(q => q.Id).First(),
+                    RoleId = context.OfficeRoles.Where(q => q.Id == (int)OfficeRoleEnum.User).Select(q => q.Id).First(),
+                    ImtsOfficeId = 26
+                });
+
+                foreach (var user in users)
+                {
+                    await userManager.CreateAsync(user, "Pa$$w0rd");
+                }
+
+                await context.AddRangeAsync(officeList);
+                await context.SaveChangesAsync();
+            }
 
         }
+
+
+
+
+
+
+
+
     }
 }

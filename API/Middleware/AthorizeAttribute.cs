@@ -1,4 +1,5 @@
 using System;
+using API.Services.Models;
 using Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,8 +12,8 @@ namespace API.Middleware
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (AppUser)context.HttpContext.Items["User"];
-            if (user == null)
+            var userId = context.HttpContext.Items["UserId"];
+            if (userId == null)
             {
                 // not logged in
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };

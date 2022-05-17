@@ -1,5 +1,7 @@
 using System.Text;
+using API.Middleware;
 using API.Services;
+using API.Services.Interfaces;
 using Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +28,7 @@ namespace API.Extensions
             .AddEntityFrameworkStores<AppContext>()
             .AddSignInManager<SignInManager<AppUser>>();
 
+            services.Configure<AppSettings>(config.GetSection("AppSettings"));
 
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
@@ -43,7 +46,7 @@ namespace API.Extensions
                 
             });
             
-            services.AddScoped<TokenService>();
+            services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<UserService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

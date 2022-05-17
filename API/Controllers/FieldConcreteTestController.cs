@@ -23,8 +23,8 @@ namespace API.Controllers
         public FieldConcreteTestController(
             IConnectionService connectionService,
             ConcreteService concreteService,
-            UserService userService,
-            IEntityScope scope) : base(userService, scope)
+            UserService userService
+            ) : base(userService)
         {
             _concreteService = concreteService;
             _connectionService = connectionService;

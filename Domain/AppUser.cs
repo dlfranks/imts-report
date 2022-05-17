@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using Domain.imts;
 using Microsoft.AspNetCore.Identity;
 
 namespace Domain
@@ -10,9 +12,10 @@ namespace Domain
     {
         int officeId { get; set; }
     }
-    public enum Roles
+    public enum OfficeRoleEnum
     {
-        Administrator = 1,
+        Super = 1,
+        Administrator,
         User
     }
     public class EntityScope : IEntityScope
@@ -25,17 +28,20 @@ namespace Domain
 
         public string RoleName { get; set; }
     }
-	
-	public class AppUserOfficeRole
+
+    public class AppUserOfficeRole
     {
         public int RoleId { get; set; }
         public virtual OfficeRole Role { get; set; }
-        public string AppuserId { get; set; }
+        public string AppUserId { get; set; }
         public virtual AppUser AppUser { get; set; }
         //Users have roles by office
         public int ImtsOfficeId { get; set; }
-        
-    }
+        [NotMapped]
+        public virtual Office ImtsOffice {get; set;}
+
+
+}
     public class AppUser : IdentityUser
     {
         public string FirstName { get; set; }
@@ -44,6 +50,7 @@ namespace Domain
         public bool IsImtsUser { get; set; }
         public string ImtsUserName { get; set; }
         public int ImtsEmployeeId { get; set; }
+
 
     }
 }

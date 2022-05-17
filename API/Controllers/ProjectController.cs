@@ -16,9 +16,8 @@ namespace API.Controllers
         private readonly ImtsContext _imtsContext;
         public ProjectController(
             ImtsContext imtsContext,
-            IEntityScope scope,
             UserService userService)
-            :base(userService, scope)
+            :base(userService)
         {
             _imtsContext = imtsContext;
         }
