@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Services;
+using Application.Interfaces;
 using Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +16,7 @@ namespace API.Controllers
     {
         private readonly ImtsContext _imtsContext;
         public ProjectController(
-            ImtsContext imtsContext,
-            UserService userService)
-            :base(userService)
+            ImtsContext imtsContext, IUserAccessor userAccessor) :base(userAccessor)
         {
             _imtsContext = imtsContext;
         }

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Application.Interfaces;
+using Application.User;
 using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Security
@@ -12,9 +13,27 @@ namespace Infrastructure.Security
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string GetUsername()
+        public int GetOfficeId()
         {
-            return _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+            var userSetting = GetUserSettings();
+            return userSetting.currentOfficeId;
+        }
+
+        public string GetUserId()
+        {
+            var userSetting = GetUserSettings();
+            return userSetting.appUserId;
+        }
+
+
+        public UserSetting GetUserSettings()
+        {
+            return (UserSetting)_httpContextAccessor.HttpContext.Items["CurrentUserSettings"];
+        }
+
+        public void RemoveUserSetting()
+        {
+            _httpContextAccessor.HttpContext.Items["CurrentUserSettings"] = null;
         }
     }
 }

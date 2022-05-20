@@ -7,6 +7,7 @@ using API.Middleware;
 using API.Services;
 using API.Services.Interfaces;
 using Application.Core;
+using Application.Interfaces;
 using Domain;
 using Domain.imts;
 using Microsoft.AspNetCore.Authorization;
@@ -29,9 +30,9 @@ namespace API.Controllers
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManger,
             ITokenService tokenService,
-            UserService userService
-
-            ) : base(userService)
+            UserService userService,
+            IUserAccessor userAccessor
+            ) : base(userAccessor)
         {
             _signInManager = signInManger;
             _tokenService = tokenService;
@@ -41,16 +42,16 @@ namespace API.Controllers
         [HttpGet("switchoffice")]
         public async Task<ActionResult<UserDTO>> SwitchOffice(int newOfficeId)
         {
-            var userId = HttpContext.Items["UserId"].ToString();
-            var currentUserOfficeId = int.Parse(HttpContext.Items["OfficeId"].ToString());
+            var cuurentUserSettings = _userAccessor.GetUserSettings();
+            var userId = cuurentUserSettings.appUserId;
             
-            if (string.IsNullOrEmpty(userId) && newOfficeId <= 0)
+            if (string.IsNullOrWhiteSpace(cuurentUserSettings.appUserId) && newOfficeId <= 0)
                 return BadRequest();
             
             var user = await _userManager.Users.Where(q => q.Id == userId).FirstOrDefaultAsync();
-            var isUserInOffice = (await _userService.CreateUserSettings()).isUserInOffice(newOfficeId);
+            var isUserInOffice = cuurentUserSettings.isUserInOffice(newOfficeId);
             if(user !=null && isUserInOffice) 
-                CreateUserObject(user, newOfficeId);
+                return CreateUserObject(user, newOfficeId);
             return BadRequest();
         }
 
@@ -74,21 +75,21 @@ namespace API.Controllers
 
         [API.Middleware.Authorize]
         [HttpGet("getcurrentuser")]
-        public async Task<ActionResult<UserDTO>> GetCurrentUser(int officeId)
+        public async Task<ActionResult<object>> GetCurrentUser()
         {
-            var userId = HttpContext.Items["UserId"].ToString();
-            var currentUserOfficeId = int.Parse(HttpContext.Items["OfficeId"].ToString());
+            var currentUserSettings = _userAccessor.GetUserSettings(); 
             
+            if (currentUserSettings == null)
+                return Unauthorized("UserSetting Error");
             
-            if (string.IsNullOrEmpty(userId) && officeId <= 0)
-                return BadRequest();
-            if(currentUserOfficeId != officeId) return Unauthorized("Current User Office is Not Valid.");
-            var user = await _userManager.Users.Where(q => q.Id == userId).FirstOrDefaultAsync();
-            var isUserInOffice = (await _userService.CreateUserSettings()).isUserInOffice(officeId);
+            var user = await _userManager.Users.Where(q => q.Id == currentUserSettings.appUserId).FirstOrDefaultAsync();
+            var isUserInOffice = currentUserSettings.isUserInOffice(currentUserSettings.currentOfficeId);
             if(user !=null && isUserInOffice) 
-                CreateUserObject(user, officeId);
-            
-
+                return new {
+                        Id=user.Id, 
+                        officeId = currentUserSettings.currentOfficeId,
+                        DisplauName= user.FirstName + " " + user.LastName,
+                        };
 
             return BadRequest();
         }
@@ -97,9 +98,9 @@ namespace API.Controllers
         {
             var userDto = new UserDTO
             {
+                Id = user.Id,
                 CurrentOfficeId = officeId,
                 DisplayName = user.FirstName + " " + user.LastName,
-                //Image = null,
                 Token = _tokenService.generateJwtToken(user, officeId),
                 Username = user.UserName,
 

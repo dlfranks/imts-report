@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Core;
@@ -10,23 +11,15 @@ using Domain.imts;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.User
 {
-    public class Create
+    public class Edit
     {
         public class Command : IRequest<Result<Unit>>
         {
             public AppUserDTO appUserDTO { get; set; }
-        }
-
-        public class CommandValidator : AbstractValidator<Command>
-        {
-            public CommandValidator()
-            {
-                RuleFor(q => q.appUserDTO).SetValidator(new AppuserValidator());
-            }
         }
 
         public class Handler : IRequestHandler<Command, Result<Unit>>
@@ -49,34 +42,36 @@ namespace Application.User
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 Employee imtsUser = null;
-                AppUser user = new AppUser
-                {
-                    UserName = request.appUserDTO.Email,
-                    FirstName = request.appUserDTO.FirstName,
-                    LastName = request.appUserDTO.LastName,
-                    Email = request.appUserDTO.Email,
-                    MainOfficeId = _userAccessor.GetOfficeId(),
-                    IsImtsUser = request.appUserDTO.IsImtsUser,
-                    CreateDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now
-                };
+
+                AppUser user = await _userManager.Users.Where(q => q.Id == request.appUserDTO.Id).FirstOrDefaultAsync();
+                if(user == null) return Result<Unit>.Failure("User Not Found");
+
+                user.UserName = request.appUserDTO.Email;
+                user.FirstName = request.appUserDTO.FirstName;
+                user.LastName = request.appUserDTO.LastName;
+                user.Email = request.appUserDTO.Email;
+                user.IsImtsUser = request.appUserDTO.IsImtsUser;
+                user.UpdatedDate = DateTime.Now;
+                
+
                 if (request.appUserDTO.IsImtsUser)
                 {
-                    if(String.IsNullOrWhiteSpace(request.appUserDTO.ImtsUserName))
+                    if(string.IsNullOrWhiteSpace(request.appUserDTO.ImtsUserName))
                         return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + "Fill UserName");
+
                     imtsUser = await _imtsUserService.GetImtsUserByUserName(request.appUserDTO.ImtsUserName);
-                    if (imtsUser == null) return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + " Not Found");
+
+                    if (imtsUser == null) return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + "UserName Not Found From IMTS.");
+                    
                     user.MainOfficeId = imtsUser.mainOfficeId;
                     user.ImtsEmployeeId = imtsUser.id;
 
                 }
-                var result = await _userManager.CreateAsync(user, request.appUserDTO.Password);
-                
-                
+                var result = await _userManager.UpdateAsync(user);
                 if (result.Succeeded)
                     await _unitOfWork.Users.addRoleToUser(user, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
                 else
-                    return Result<Unit>.Failure("Failed to create a user.");
+                    return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + "Failed to update the user");
 
                 
                 if (await _unitOfWork.TryCommit())
@@ -86,11 +81,14 @@ namespace Application.User
                 }
                 else
                 {
-                    return Result<Unit>.Failure("Failed to create a user's role.");
+                    return Result<Unit>.Failure("Failed to update the user's role.");
                 }
 
 
             }
+
+            
+            
         }
     }
 }

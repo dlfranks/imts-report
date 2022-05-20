@@ -2,14 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Domain.imts
 {
-    public enum PermissionAction
-    {
-        Create,
-        Read,
-        Update,
-        Delete,
-        Index
-    }
+    
     public class Employee
     {
         public int id { get; set; }

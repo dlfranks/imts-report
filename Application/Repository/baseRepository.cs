@@ -7,17 +7,20 @@ using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Application.Interfaces;
+using Persistence;
+using Domain.imts;
 
-namespace Persistence
+namespace Application.Repository
 {
     public class BaseRepository<T> : IRepository<T> where T : class, IEntity
     {
-        protected AppContext _context;
+        protected Persistence.AppContext _context;
         internal DbSet<T> _set;
         public readonly ILogger _logger;
 
         public BaseRepository(
-            AppContext context,
+            Persistence.AppContext context,
             ILogger logger)
         {
             _context = context;
@@ -68,31 +71,44 @@ namespace Persistence
 
     public class UserRepository : IUserRepository
     {
-        protected readonly DbSet<OfficeRole> _OfficeRole;
-        protected readonly DbSet<AppUserOfficeRole> _AppUserOfficeRole;
-        private readonly AppContext _context;
+        protected readonly DbSet<OfficeRole> _OfficeRoles;
+        protected readonly DbSet<AppUserOfficeRole> _AppUserOfficeRoles;
+        public DbSet<AppUser> _AppUsers;
+        private readonly Persistence.AppContext _context;
         private readonly ImtsContext _imtsContext;
         private readonly ILogger _logger;
         protected readonly UserManager<AppUser> _UserManager;
         public UserRepository(
-            AppContext context,
+            Persistence.AppContext context,
             ImtsContext imtsContext,
             ILogger logger,
             UserManager<AppUser> userManager)
         {
-            _OfficeRole = context.OfficeRoles;
-            _AppUserOfficeRole = context.AppUserOfficeRoles;
+            _OfficeRoles = context.OfficeRoles;
+            _AppUserOfficeRoles = context.AppUserOfficeRoles;
             _context = context;
             _imtsContext = imtsContext;
             _logger = logger;
             _UserManager = userManager;
+            _AppUsers = context.Users;
+
+        }
+
+        public DbSet<AppUser> AppUsers
+        {
+            get
+            {
+                if (_AppUsers == null)
+                    _AppUsers = _context.Users;
+                return _AppUsers;
+            }
         }
 
         public async Task addRoleToUser(string appUserId, int officeId, string roleName)
         {
 
-            var _roleId = await _OfficeRole.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
-            _AppUserOfficeRole.Add(new AppUserOfficeRole
+            var _roleId = await _OfficeRoles.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
+            _AppUserOfficeRoles.Add(new AppUserOfficeRole
             {
                 AppUserId = appUserId,
                 RoleId = _roleId,
@@ -104,14 +120,14 @@ namespace Persistence
         {
             try
             {
-                var _roleId = await _OfficeRole.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
+                var _roleId = await _OfficeRoles.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
                 var appUserOfficeRole = new AppUserOfficeRole
                 {
                     AppUser = appUser,
                     RoleId = _roleId,
                     ImtsOfficeId = officeId
                 };
-                _AppUserOfficeRole.Add(appUserOfficeRole);
+                _AppUserOfficeRoles.Add(appUserOfficeRole);
                 return true;
             }
             catch (Exception ex)
@@ -120,23 +136,51 @@ namespace Persistence
                 return false;
             }
         }
-        public IQueryable<AppUserOfficeRole> getUsersRoles(string appUserId)
+
+        public IQueryable<AppUserOfficeRole> getAppUsersOfficeRoleByOffice(int officeId)
         {
-            return _AppUserOfficeRole.Where(q => q.AppUserId == appUserId).Include(q => q.Role);
+            return _AppUserOfficeRoles.Where(q => q.ImtsOfficeId == officeId).Include(q => q.Role);
+        }
+        public IQueryable<AppUserOfficeRole> getAppUsersOfficeRoleByUserId(string appUserId)
+        {
+            return _AppUserOfficeRoles.Where(q => q.AppUserId == appUserId).Include(q => q.Role);
+        }
+        public async Task<AppUserOfficeRole> getAppUsersOfficeRoleByUserIdAndOfficeId(string appUserId, int officeId)
+        {
+            var userOfficesRole = await getAppUsersOfficeRoleByUserId(appUserId).Where(q => q.ImtsOfficeId == officeId).FirstOrDefaultAsync();
+            var o = await _imtsContext.Offices.Where(q => q.id == userOfficesRole.ImtsOfficeId).FirstAsync();
+            if (o != null)
+                userOfficesRole.ImtsOffice = o;
+
+            return userOfficesRole;
         }
 
         public async Task<OfficeRole> getOfficeRole(string roleName)
         {
-            return await _OfficeRole.Where(q => q.RoleName == roleName).FirstAsync();
+            return await _OfficeRoles.Where(q => q.RoleName == roleName).FirstAsync();
         }
 
         public async Task removeRoleFromUser(string appUserId, int officeId, string roleName)
         {
             var role = await getOfficeRole(roleName);
             var appUserOfficeRole = await _context.AppUserOfficeRoles.Where(q => q.AppUserId == appUserId && q.RoleId == role.Id).FirstOrDefaultAsync();
-            _AppUserOfficeRole.Remove(appUserOfficeRole);
+            _AppUserOfficeRoles.Remove(appUserOfficeRole);
         }
 
-
+        public async Task<List<Office>> getImtsOfficeByUser(int imtsEmployeeId)
+        {
+            var offices = await _imtsContext.UsersInOfficeRoles.Where(q => q.employeeId == imtsEmployeeId)
+                .GroupBy(q => q.officeId).Select(g => g.First().office).ToListAsync();
+            return offices;
+        }
+        public async Task<List<IDValuePair>> getImtsAllOffices()
+        {
+            var offices = await _imtsContext.Offices.Select(q => new IDValuePair
+            {
+                id = q.id,
+                name = q.name
+            }).ToListAsync();
+            return offices;
+        }
     }
 }

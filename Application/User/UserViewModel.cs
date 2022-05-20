@@ -1,9 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs
+namespace Application.User
 {
-    public class RegisterDTO
+
+    public class AppUserOfficeRoleViewModel
     {
+        public string UserId { get; set; }
+        public int OfficeId { get; set; }
+        public string OfficeName { get; set; }
+        public int RoleId { get; set; }
+        public string RoleName { get; set; }
+    }
+    public class AppUserDTO
+    {
+        public string Id { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]
@@ -16,10 +26,21 @@ namespace API.DTOs
         [Required]
         [RegularExpression("(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,8}$", ErrorMessage = "Password must be complex")]
         public string Password { get; set; }
-
-        public int CurrentOfficeId { get; set; }
         [Required]
         public string RoleName { get; set; }
+        
+        
+        public string UserName { get; set; }
+       
+       
+        public string OfficeId { get; set; }
+        
+        
+
+    }
+    public class RegisterDTO
+    {
+        
 
     }
 }

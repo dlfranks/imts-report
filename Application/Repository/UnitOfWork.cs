@@ -3,16 +3,18 @@ using System.Threading.Tasks;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Persistence;
+using Application.Interfaces;
 
-namespace Persistence
+namespace Application.Repository
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly AppContext _context;
+        private readonly Persistence.AppContext _context;
         private readonly ILogger _logger;
         private readonly UserManager<AppUser> _userManager;
         private readonly ImtsContext _imtsContext;
-        public UnitOfWork(AppContext context, ImtsContext imtsContext, ILoggerFactory loggerFactory, UserManager<AppUser> userManager)
+        public UnitOfWork(Persistence.AppContext context, ImtsContext imtsContext, ILoggerFactory loggerFactory, UserManager<AppUser> userManager)
         {
             _imtsContext = imtsContext;
             _context = context;

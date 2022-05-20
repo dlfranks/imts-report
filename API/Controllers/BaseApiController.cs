@@ -1,9 +1,7 @@
 using System;
 using System.Text.Json;
-using API.Services;
-using API.Services.Interfaces;
 using Application.Core;
-using Domain;
+using Application.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +13,12 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
-        protected readonly UserService _userService;
-        public BaseApiController(UserService userService)
+        protected readonly IUserAccessor _userAccessor;
+
+        public BaseApiController(IUserAccessor userAccessor)
         {
-            _userService = userService;
+            _userAccessor = userAccessor;
+
         }
         private IMediator _mediator;
 

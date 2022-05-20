@@ -2,6 +2,10 @@ using System.Text;
 using API.Middleware;
 using API.Services;
 using API.Services.Interfaces;
+using Application.Core;
+using Application.Imts;
+using Application.Interfaces;
+using Application.Repository;
 using Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -48,6 +52,7 @@ namespace API.Extensions
             
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<UserService>();
+            services.AddScoped<ImtsUserService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;

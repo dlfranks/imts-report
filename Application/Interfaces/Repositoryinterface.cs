@@ -4,10 +4,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Domain;
+using Domain.imts;
+using Microsoft.EntityFrameworkCore;
 
-namespace Persistence
+namespace Application.Interfaces
 {
-    public interface IRepository<T> where T : class, IEntity
+    public interface IRepository<T> where T : class
     {
         IQueryable<T> get();
         IQueryable<T> get(int id);
@@ -21,11 +23,17 @@ namespace Persistence
 
     public interface IUserRepository
     {
-        IQueryable<AppUserOfficeRole> getUsersRoles(string appUserId);
+        IQueryable<AppUserOfficeRole> getAppUsersOfficeRoleByOffice(int officeId);
+        IQueryable<AppUserOfficeRole> getAppUsersOfficeRoleByUserId(string appUserId);
+        Task<AppUserOfficeRole> getAppUsersOfficeRoleByUserIdAndOfficeId(string appUserId, int officeId);
         Task addRoleToUser(string appUserId, int officeId, string roleName);
         Task<bool> addRoleToUser(AppUser appUser, int officeId, string roleName);
         Task removeRoleFromUser(string appUserId, int officeId, string roleName);
         Task<OfficeRole> getOfficeRole(string roleName);
+        DbSet<AppUser> AppUsers { get; }
+        Task<List<IDValuePair>> getImtsAllOffices();
+
+
     }
 
     public interface IUnitOfWork

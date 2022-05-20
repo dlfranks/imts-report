@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using API.Services;
+using Application.Core;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
-using API.Services.Interfaces;
 
 namespace API.Middleware
 {
@@ -16,9 +16,11 @@ namespace API.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly AppSettings _appSettings;
+        private readonly ILogger<JwtMiddleware> _logger;
 
-        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings)
+        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> appSettings, ILogger<JwtMiddleware> logger)
         {
+            _logger = logger;
             _next = next;
             _appSettings = appSettings.Value;
         }
@@ -58,10 +60,9 @@ namespace API.Middleware
                 context.Items["OfficeId"] = officeId;
                 context.Items["CurrentUserSettings"] = await userService.CreateUserSettings();
             }
-            catch
+            catch (Exception ex)
             {
-                // do nothing if jwt validation fails
-                // account is not attached to context so request won't have access to secure routes
+                _logger.LogError(ex, ex.Message);
             }
         }
     }

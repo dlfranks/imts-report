@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.imts;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +23,7 @@ namespace Domain
     {
         public int officeId { get; set; }
     }
-    public class OfficeRole : IEntity
+    public class OfficeRole :IEntity
     {
         public int Id { get; set; }
 
@@ -50,7 +51,8 @@ namespace Domain
         public bool IsImtsUser { get; set; }
         public string ImtsUserName { get; set; }
         public int ImtsEmployeeId { get; set; }
-
-
+        public DateTime CreateDate { get; set; }
+        public DateTime UpdatedDate { get; set; }
+        public bool IsSuperUser { get; set; } = false;
     }
 }
