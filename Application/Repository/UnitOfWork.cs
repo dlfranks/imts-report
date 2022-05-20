@@ -12,25 +12,23 @@ namespace Application.Repository
     {
         private readonly Persistence.AppContext _context;
         private readonly ILogger _logger;
-        private readonly UserManager<AppUser> _userManager;
         private readonly ImtsContext _imtsContext;
         public UnitOfWork(Persistence.AppContext context, ImtsContext imtsContext, ILoggerFactory loggerFactory, UserManager<AppUser> userManager)
         {
             _imtsContext = imtsContext;
             _context = context;
             _logger = loggerFactory.CreateLogger("logs");
-            _userManager = userManager;
         }
 
         public IUserRepository _Users = null;
         public IRepository<OfficeRole> _OfficeRoles = null;
 
-        public IUserRepository Users
+        public IUserRepository AppUsers
         {
             get
             {
                 if (_Users == null)
-                    _Users = new UserRepository(_context, _imtsContext, _logger, _userManager); ;
+                    _Users = new UserRepository(_context, _imtsContext, _logger); ;
                 return _Users;
             }
         }
@@ -61,7 +59,11 @@ namespace Application.Repository
             }
             return true;
         }
-
+        public void Dispose()
+        {
+            _context.Dispose();
+            _imtsContext.Dispose();
+        }
 
     }
 }

@@ -14,15 +14,15 @@ namespace API.Controllers
     public class BaseApiController : ControllerBase
     {
         protected readonly IUserAccessor _userAccessor;
+        private IMediator _mediator;
 
+        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
         public BaseApiController(IUserAccessor userAccessor)
         {
             _userAccessor = userAccessor;
 
         }
-        private IMediator _mediator;
-
-        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+        
         protected IActionResult HandleResult<T>(Result<T> result)
         {
             if (result == null) return NotFound();

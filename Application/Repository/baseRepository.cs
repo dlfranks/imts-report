@@ -77,19 +77,16 @@ namespace Application.Repository
         private readonly Persistence.AppContext _context;
         private readonly ImtsContext _imtsContext;
         private readonly ILogger _logger;
-        protected readonly UserManager<AppUser> _UserManager;
         public UserRepository(
             Persistence.AppContext context,
             ImtsContext imtsContext,
-            ILogger logger,
-            UserManager<AppUser> userManager)
+            ILogger logger)
         {
             _OfficeRoles = context.OfficeRoles;
             _AppUserOfficeRoles = context.AppUserOfficeRoles;
             _context = context;
             _imtsContext = imtsContext;
             _logger = logger;
-            _UserManager = userManager;
             _AppUsers = context.Users;
 
         }

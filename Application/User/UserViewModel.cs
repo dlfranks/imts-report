@@ -19,7 +19,7 @@ namespace Application.User
         [Required]
         public string LastName { get; set; }
         public bool IsImtsUser { get; set; } = false;
-        public string ImtsUserName { get; set; }
+        public string ImtsEmployeeUserName { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }

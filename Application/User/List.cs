@@ -34,7 +34,7 @@ namespace Application.User
             }
             public async Task<Result<List<AppUserDTO>>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var lst = await _unitOfWork.Users.getAppUsersOfficeRoleByOffice(request.officeId).Select(q => q.AppUser).OrderBy(q => q.CreateDate).ToListAsync();
+                var lst = await _unitOfWork.AppUsers.getAppUsersOfficeRoleByOffice(request.officeId).Select(q => q.AppUser).OrderBy(q => q.CreateDate).ToListAsync();
                 
                 var users = _mapper.Map<List<AppUserDTO>>(lst);
 

@@ -69,7 +69,7 @@ namespace Application.User
                 }
                 var result = await _userManager.UpdateAsync(user);
                 if (result.Succeeded)
-                    await _unitOfWork.Users.addRoleToUser(user, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
+                    await _unitOfWork.AppUsers.addRoleToUser(user, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
                 else
                     return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + "Failed to update the user");
 

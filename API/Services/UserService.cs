@@ -17,16 +17,14 @@ namespace API.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<UserService> _logger;
-
-        private readonly UserManager<AppUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
         public UserService(IHttpContextAccessor httpContextAccessor,
-        UserManager<AppUser> userManager, IUnitOfWork unitOfWork, ILogger<UserService> logger)
+        IUnitOfWork unitOfWork, ILogger<UserService> logger)
         {
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _unitOfWork = unitOfWork;
-            _userManager = userManager;
+            
 
 
         }
@@ -39,8 +37,8 @@ namespace API.Services
             if (userId == null) return null;
             var officeId = int.Parse(_httpContextAccessor.HttpContext.Items["OfficeId"].ToString());
             if (officeId <= 0) return null;
-            var appUser = await _userManager.Users.FirstOrDefaultAsync(q => q.Id == userId);
-            var appUserOfficeRoles = await _unitOfWork.Users.getAppUsersOfficeRoleByUserId(userId).ToListAsync();
+            var appUser = await _unitOfWork.AppUsers.AppUsers.FirstOrDefaultAsync(q => q.Id == userId);
+            var appUserOfficeRoles = await _unitOfWork.AppUsers.getAppUsersOfficeRoleByUserId(userId).ToListAsync();
             us.currentOfficeId = officeId;
             us.imtsEmployeeId = appUser.ImtsEmployeeId;
             us.userName = appUser.UserName;
@@ -53,7 +51,7 @@ namespace API.Services
             
             if(us.isSuperUser)
             {
-                us._memberOffices = await _unitOfWork.Users.getImtsAllOffices();
+                us._memberOffices = await _unitOfWork.AppUsers.getImtsAllOffices();
 
             }else{
                 us._memberOffices = appUserOfficeRoles.Select(q => new IDValuePair
