@@ -15,8 +15,8 @@ namespace API.Middleware
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             //Used the userId because it gets to the Onauthentication event before setting the UserSetting
-            var userId = context.HttpContext.Items["UserId"].ToString();
-            if (string.IsNullOrWhiteSpace(userId))
+            var userId = context.HttpContext.Items["UserId"];
+            if (userId == null)
             {
                 // not logged in
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };

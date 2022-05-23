@@ -49,8 +49,8 @@ namespace Domain
         public string LastName { get; set; }
         public int MainOfficeId { get; set; }
         public bool IsImtsUser { get; set; }
-        public string ImtsEmployeeUserName { get; set; } = string.Empty;
-        public int ImtsEmployeeId { get; set; }
+        public string ImtsUserName { get; set; } = string.Empty;
+        public int? ImtsEmployeeId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         public bool IsSuperUser { get; set; } = false;

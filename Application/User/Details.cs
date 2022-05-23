@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Core;
+using Application.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain;
@@ -22,8 +23,12 @@ namespace Application.User
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly IMapper _mapper;
-            public Handler(UserManager<AppUser> userManager, IMapper mapper)
+            private readonly IUserAccessor _userAccessor;
+            private readonly IUnitOfWork _unitOfWork;
+            public Handler(UserManager<AppUser> userManager, IUserAccessor userAccessor, IUnitOfWork unitOfWork, IMapper mapper)
             {
+                _unitOfWork = unitOfWork;
+                _userAccessor = userAccessor;
                 _mapper = mapper;
                 _userManager = userManager;
 
@@ -31,10 +36,11 @@ namespace Application.User
 
             public async Task<Result<AppUserDTO>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var userDto = await _userManager.Users.Where(q => q.Id == request.Id)
-                .ProjectTo<AppUserDTO>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
-
-                return Result<AppUserDTO>.Success(userDto);
+                var officeId = _userAccessor.GetOfficeId();
+                var appUserOfficeRole = await _unitOfWork.Users.getAppUsersOfficeRolesByUserAndOffice(request.Id, officeId);
+                var appUserDTO = _mapper.Map<AppUserDTO>(appUserOfficeRole);
+                
+                return Result<AppUserDTO>.Success(appUserDTO);
             }
         }
     }

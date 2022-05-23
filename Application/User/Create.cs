@@ -31,12 +31,15 @@ namespace Application.User
         public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly IUserAccessor _userAccessor;
-            private readonly UserManager<AppUser> _userManager;
             private readonly ImtsUserService _imtsUserService;
             private readonly Persistence.AppContext _appContext;
+            private readonly IUnitOfWork _unitOfWork;
+            private readonly UserManager<AppUser> _userManager;
 
-            public Handler(IUserAccessor userAccessor, Persistence.AppContext appContext, ImtsUserService imtsUserService)
+            public Handler(IUserAccessor userAccessor, UserManager<AppUser> userManager, IUnitOfWork unitOfWork, Persistence.AppContext appContext, ImtsUserService imtsUserService)
             {
+                _userManager = userManager;
+                _unitOfWork = unitOfWork;
                 _appContext = appContext;
                 _imtsUserService = imtsUserService;
                 _userAccessor = userAccessor;
@@ -57,10 +60,10 @@ namespace Application.User
                 user.UpdatedDate = DateTime.Now;
                 if (request.appUserDTO.IsImtsUser)
                 {
-                    if (String.IsNullOrWhiteSpace(request.appUserDTO.ImtsEmployeeUserName))
-                        return Result<Unit>.Failure(request.appUserDTO.ImtsEmployeeUserName + "Fill UserName");
-                    imtsUser = await _imtsUserService.GetImtsUserByUserName(request.appUserDTO.ImtsEmployeeUserName);
-                    if (imtsUser == null) return Result<Unit>.Failure(request.appUserDTO.ImtsEmployeeUserName + " Not Found");
+                    if (String.IsNullOrWhiteSpace(request.appUserDTO.ImtsUserName))
+                        return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + "Fill UserName");
+                    imtsUser = await _imtsUserService.GetImtsUserByUserName(request.appUserDTO.ImtsUserName);
+                    if (imtsUser == null) return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + " Not Found");
                     user.MainOfficeId = imtsUser.mainOfficeId;
                     user.ImtsEmployeeId = imtsUser.id;
 
@@ -69,13 +72,13 @@ namespace Application.User
 
 
                 if (result.Succeeded)
-                    return Result<Unit>.Success(Unit.Value);
-                    //await _unitOfWork.AppUsers.addRoleToUser(user, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
+
+                    await _unitOfWork.Users.addRoleToUser(user, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
                 else
                     return Result<Unit>.Failure("Failed to create a user.");
 
-                //await _unitOfWork.TryCommit()
-                if (true)
+                //
+                if (await _unitOfWork.TryCommit())
                 {
 
                     return Result<Unit>.Success(Unit.Value);

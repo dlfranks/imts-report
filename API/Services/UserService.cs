@@ -18,27 +18,33 @@ namespace API.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<UserService> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        public UserService(IHttpContextAccessor httpContextAccessor,
+        private readonly UserManager<AppUser> _userManager;
+        public UserService(IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager,
         IUnitOfWork unitOfWork, ILogger<UserService> logger)
         {
+            _userManager = userManager;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _unitOfWork = unitOfWork;
-            
+
 
 
         }
         public async Task<UserSetting> CreateUserSettings()
         {
+            var u = _httpContextAccessor.HttpContext.Items["UserId"];
+            var o = _httpContextAccessor.HttpContext.Items["OfficeId"];
+            if (u == null || o == null) return null;
             var currentUserSetting = (UserSetting)_httpContextAccessor.HttpContext.Items["CurrentUserSettings"];
             if (currentUserSetting != null) return currentUserSetting;
+
+            var userId = u.ToString();
+            var officeId = int.Parse(o.ToString());
             var us = new UserSetting();
-            var userId = _httpContextAccessor.HttpContext.Items["UserId"].ToString();
-            if (userId == null) return null;
-            var officeId = int.Parse(_httpContextAccessor.HttpContext.Items["OfficeId"].ToString());
-            if (officeId <= 0) return null;
-            var appUser = await _unitOfWork.AppUsers.AppUsers.FirstOrDefaultAsync(q => q.Id == userId);
-            var appUserOfficeRoles = await _unitOfWork.AppUsers.getAppUsersOfficeRoleByUserId(userId).ToListAsync();
+
+
+            var appUser = await _userManager.FindByIdAsync(userId);
+            var appUserOfficeRoles = await _unitOfWork.Users.getAppUsersOfficeRolesByUser(userId);
             us.currentOfficeId = officeId;
             us.imtsEmployeeId = appUser.ImtsEmployeeId;
             us.userName = appUser.UserName;
@@ -48,19 +54,21 @@ namespace API.Services
             us.fullName = appUser.FirstName + " " + appUser.LastName;
             us.roleName = currentOfficeRole.Role.RoleName;
             us._isSuperUser = appUser.IsImtsUser;
-            
-            if(us.isSuperUser)
-            {
-                us._memberOffices = await _unitOfWork.AppUsers.getImtsAllOffices();
 
-            }else{
+            if (us.isSuperUser)
+            {
+                us._memberOffices = await _unitOfWork.Users.getImtsAllOffices();
+
+            }
+            else
+            {
                 us._memberOffices = appUserOfficeRoles.Select(q => new IDValuePair
                 {
                     id = q.ImtsOfficeId,
                     name = q.ImtsOffice.name
                 }).ToList();
             }
-            
+
             us.imtsEmployeeId = appUser.ImtsEmployeeId;
             us.IsImtsUser = appUser.IsImtsUser;
             return us;

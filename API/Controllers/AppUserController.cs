@@ -25,10 +25,10 @@ namespace API.Controllers
         public async Task<IActionResult> list()
         {
             var officeId = _userAccessor.GetOfficeId();
-            return HandleResult(await Mediator.Send(new List.Query{officeId = officeId}));
+            return HandleResult(await Mediator.Send(new List.Query()));
 
         }
-        [HttpGet("{id}")]
+        [HttpGet("details")]
         public async Task<IActionResult> Details(string id)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }));

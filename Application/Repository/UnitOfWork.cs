@@ -23,7 +23,7 @@ namespace Application.Repository
         public IUserRepository _Users = null;
         public IRepository<OfficeRole> _OfficeRoles = null;
 
-        public IUserRepository AppUsers
+        public IUserRepository Users
         {
             get
             {

@@ -23,22 +23,24 @@ namespace Application.Interfaces
 
     public interface IUserRepository
     {
-        IQueryable<AppUserOfficeRole> getAppUsersOfficeRoleByOffice(int officeId);
-        IQueryable<AppUserOfficeRole> getAppUsersOfficeRoleByUserId(string appUserId);
-        Task<AppUserOfficeRole> getAppUsersOfficeRoleByUserIdAndOfficeId(string appUserId, int officeId);
+        DbSet<AppUser> AppUsers { get; }
+        void updateAppUserOfficeRole(AppUserOfficeRole appUserOfficeRole);
         Task addRoleToUser(string appUserId, int officeId, string roleName);
         Task<bool> addRoleToUser(AppUser appUser, int officeId, string roleName);
+        IQueryable<AppUserOfficeRole> getAppUsersOfficeRolesByOffice(int officeId);
+        Task<List<AppUserOfficeRole>> getAppUsersOfficeRolesByUser(string userId);
+        Task<AppUserOfficeRole> getAppUsersOfficeRolesByUserAndOffice(string appUserId, int officeId);
+        Task<OfficeRole> getOfficeRoleByUserAndOffice(string userId, int officeId);
+        Task<OfficeRole> getOfficeRoleByRoleName(string roleName);
         Task removeRoleFromUser(string appUserId, int officeId, string roleName);
-        Task<OfficeRole> getOfficeRole(string roleName);
-        DbSet<AppUser> AppUsers { get; }
+        Task<List<Office>> getImtsOfficesByUser(int imtsEmployeeId);
         Task<List<IDValuePair>> getImtsAllOffices();
-
 
     }
 
     public interface IUnitOfWork : IDisposable
     {
-        IUserRepository AppUsers { get; }
+        IUserRepository Users { get; }
         IRepository<OfficeRole> OfficeRoles { get; }
         
 

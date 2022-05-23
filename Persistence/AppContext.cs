@@ -1,5 +1,4 @@
 using Domain;
-using Domain.imts;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
