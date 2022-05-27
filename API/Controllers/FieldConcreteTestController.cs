@@ -5,7 +5,6 @@ using API.Services;
 using API.Services.ConcreteService;
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Imts.ConnectionService;
-using Domain;
 using Application.Interfaces;
 
 namespace API.Controllers
@@ -18,8 +17,9 @@ namespace API.Controllers
         public FieldConcreteTestController(
             IConnectionService connectionService,
             ConcreteService concreteService,
-            IUserAccessor userAccessor
-            ) : base(userAccessor)
+            IUserAccessor userAccessor,
+            UserService userService
+            ) : base(userAccessor, userService)
         {
             _concreteService = concreteService;
             _connectionService = connectionService;

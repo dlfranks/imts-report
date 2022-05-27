@@ -1,3 +1,4 @@
+using API.Extensions.Filters;
 using API.Services.ConcreteService;
 using Application.Core;
 using Application.Interfaces;
@@ -39,7 +40,7 @@ namespace API.Extensions
             // {
             //     c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             // });
-
+            
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddHttpClient();
@@ -47,6 +48,7 @@ namespace API.Extensions
             services.AddScoped<ConcreteService>();
             services.Configure<ImtsSettings>(config.GetSection("Imts"));
             services.AddScoped<IUserAccessor, UserAccessor>();
+            services.AddScoped<UserActionFilter>();
 
             services.AddMvc().AddNewtonsoftJson();
             return services;

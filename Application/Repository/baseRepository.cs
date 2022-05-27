@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Domain;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Application.Interfaces;
 using Persistence;
 using Domain.imts;
+using Application.Interfaces;
 
 namespace Application.Repository
 {
@@ -71,9 +69,6 @@ namespace Application.Repository
 
     public class UserRepository : IUserRepository
     {
-        protected readonly DbSet<OfficeRole> _OfficeRoles;
-        protected readonly DbSet<AppUserOfficeRole> _AppUserOfficeRoles;
-        public DbSet<AppUser> _AppUsers;
         private readonly Persistence.AppContext _context;
         private readonly ImtsContext _imtsContext;
         private readonly ILogger _logger;
@@ -82,35 +77,20 @@ namespace Application.Repository
             ImtsContext imtsContext,
             ILogger logger)
         {
-            _OfficeRoles = context.OfficeRoles;
-            _AppUserOfficeRoles = context.AppUserOfficeRoles;
+
             _context = context;
             _imtsContext = imtsContext;
             _logger = logger;
-            _AppUsers = context.Users;
+
 
         }
 
-        public DbSet<AppUser> AppUsers
-        {
-            get
-            {
-                if (_AppUsers == null)
-                    _AppUsers = _context.Users;
-                return _AppUsers;
-            }
-        }
 
-        public void updateAppUserOfficeRole(AppUserOfficeRole appUserOfficeRole)
-        {
-            _context.Update<AppUserOfficeRole>(appUserOfficeRole);
-        }
 
         public async Task addRoleToUser(string appUserId, int officeId, string roleName)
         {
-
-            var _roleId = await _OfficeRoles.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
-            _AppUserOfficeRoles.Add(new AppUserOfficeRole
+            var _roleId = await _context.OfficeRoles.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
+            _context.AppUserOfficeRoles.Add(new AppUserOfficeRole
             {
                 AppUserId = appUserId,
                 RoleId = _roleId,
@@ -118,84 +98,64 @@ namespace Application.Repository
             });
         }
 
-        public async Task<bool> addRoleToUser(AppUser appUser, int officeId, string roleName)
+        public IQueryable<AppUserOfficeRole> getAppUserOfficeRoleByOffice(int officeId)
         {
-            try
-            {
-                var _roleId = await _OfficeRoles.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
-                var appUserOfficeRole = new AppUserOfficeRole
-                {
-                    AppUser = appUser,
-                    RoleId = _roleId,
-                    ImtsOfficeId = officeId
-                };
-                _AppUserOfficeRoles.Add(appUserOfficeRole);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{Repo} addRoleToUser function error", typeof(UserRepository));
-                return false;
-            }
+            return _context.AppUserOfficeRoles.Where(q => q.ImtsOfficeId == officeId).Include(q => q.AppUser).Include(q => q.Role);
         }
-
-        public IQueryable<AppUserOfficeRole> getAppUsersOfficeRolesByOffice(int officeId)
+        public async Task<List<AppUserOfficeRole>> getAppUserOfficeRoleByUser(string userId)
         {
-            return _AppUserOfficeRoles.Where(q => q.ImtsOfficeId == officeId).Include(q => q.AppUser).Include(q => q.Role);
-        }
-        public async Task<List<AppUserOfficeRole>> getAppUsersOfficeRolesByUser(string userId)
-        {
-            var userOfficeRoles = await _AppUserOfficeRoles.Where(q => q.AppUserId == userId).Include(q => q.Role).ToListAsync();
+            var userOfficeRoles = await _context.AppUserOfficeRoles.Where(q => q.AppUserId == userId).Include(q => q.Role).ToListAsync();
+            if (userOfficeRoles == null && userOfficeRoles.Count == 0) return null;
             var imtsOffices = await _imtsContext.Offices.ToListAsync();
-            foreach(var u in userOfficeRoles)
+            foreach (var u in userOfficeRoles)
             {
-                u.ImtsOffice = imtsOffices.Where(q => q.id == u.ImtsOfficeId).First();
+                u.ImtsOffice = imtsOffices.Where(q => q.id == u.ImtsOfficeId).FirstOrDefault();
             }
             return userOfficeRoles;
         }
-        
-        public async Task<AppUserOfficeRole> getAppUsersOfficeRolesByUserAndOffice(string appUserId, int officeId)
+
+        public async Task<AppUserOfficeRole> getAppUserOfficeRoleByUserAndOffice(string appUserId, int officeId)
         {
-            var userOfficesRole = await getAppUsersOfficeRolesByOffice(officeId).Where(q => q.AppUserId == appUserId).FirstOrDefaultAsync();
+            var userOfficesRole = await getAppUserOfficeRoleByOffice(officeId).Where(q => q.AppUserId == appUserId).FirstOrDefaultAsync();
+            if (userOfficesRole == null) return null;
             var o = await _imtsContext.Offices.Where(q => q.id == userOfficesRole.ImtsOfficeId).FirstAsync();
             if (o != null)
                 userOfficesRole.ImtsOffice = o;
 
             return userOfficesRole;
         }
-        
-        public async Task<OfficeRole> getOfficeRoleByUserAndOffice(string userId, int officeId)
-        {
-            var uor = await getAppUsersOfficeRolesByUserAndOffice(userId, officeId);
-            return uor.Role;
-        }
-
         public async Task<OfficeRole> getOfficeRoleByRoleName(string roleName)
         {
-            return await _OfficeRoles.Where(q => q.RoleName == roleName).FirstAsync();
+            return await _context.OfficeRoles.Where(q => q.RoleName == roleName).FirstAsync();
         }
+        
+        public async Task removeAppUserOfficeRole(string appUserId, int officeId)
+        {
 
-        public async Task removeRoleFromUser(string appUserId, int officeId, string roleName)
+            var appUserOfficeRole = await getAppUserOfficeRoleByUserAndOffice(appUserId, officeId);
+            await removeAppUserOfficeRole(appUserOfficeRole.AppUserId, appUserOfficeRole.ImtsOfficeId, appUserOfficeRole.Role.RoleName);
+        }
+        public async Task removeAppUserOfficeRole(string appUserId, int officeId, string roleName)
         {
             var role = await getOfficeRoleByRoleName(roleName);
             var appUserOfficeRole = await _context.AppUserOfficeRoles.Where(q => q.AppUserId == appUserId && q.RoleId == role.Id).FirstOrDefaultAsync();
-            _AppUserOfficeRoles.Remove(appUserOfficeRole);
+            _context.AppUserOfficeRoles.Remove(appUserOfficeRole);
         }
 
         public async Task<List<Office>> getImtsOfficesByUser(int imtsEmployeeId)
         {
-            var offices = await _imtsContext.UsersInOfficeRoles.Where(q => q.employeeId == imtsEmployeeId)
+            return await _imtsContext.UsersInOfficeRoles.Where(q => q.employeeId == imtsEmployeeId)
                 .GroupBy(q => q.officeId).Select(g => g.First().office).ToListAsync();
-            return offices;
+
         }
         public async Task<List<IDValuePair>> getImtsAllOffices()
         {
-            var offices = await _imtsContext.Offices.Select(q => new IDValuePair
+            return await _imtsContext.Offices.Select(q => new IDValuePair
             {
                 id = q.id,
                 name = q.name
             }).ToListAsync();
-            return offices;
+
         }
     }
 }

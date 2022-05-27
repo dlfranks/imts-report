@@ -7,12 +7,18 @@ namespace Infrastructure.Security
 {
     public class UserAccessor : IUserAccessor
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        
         public UserAccessor(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }
 
+        public readonly IHttpContextAccessor _httpContextAccessor;
+
+        public IHttpContextAccessor GetHttpContextAccessor()
+        {
+            return _httpContextAccessor;
+        }
         public int GetOfficeId()
         {
             var userSetting = GetUserSettings();

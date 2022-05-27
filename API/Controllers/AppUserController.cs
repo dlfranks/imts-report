@@ -1,26 +1,27 @@
 using System.Threading.Tasks;
 using API.Middleware;
+using API.Services;
 using Application.Interfaces;
 using Application.User;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace API.Controllers
 {
-    [Authorize]
+    [Authorize(Role = "administrator")]
     public class AppUserController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
         public AppUserController(
             UserManager<AppUser> userManager,
-            IUserAccessor userAccessor
-            ) : base(userAccessor)
-
+            IUserAccessor userAccessor,
+            UserService userService
+            ) : base(userAccessor, userService)
         {
             _userManager = userManager;
         }
+
         [HttpGet]
         public async Task<IActionResult> list()
         {
@@ -37,20 +38,25 @@ namespace API.Controllers
         [HttpGet("lookupusername")]
         public async Task<IActionResult> LookupUsernameForCreate(string userName)
         {
-            return HandleResult(await Mediator.Send(new LookupUserName.Command{ UserName = userName }));
+            return HandleResult(await Mediator.Send(new LookupUserName.Command { UserName = userName }));
         }
         [HttpPost]
         public async Task<IActionResult> Create(AppUserDTO appUserDTO)
         {
-            return HandleResult(await Mediator.Send(new Create.Command { appUserDTO = appUserDTO }));
+            return HandleResult(await Mediator.Send(new Create.Command { appUserDTO = appUserDTO, mode = Application.Core.FormViewMode.Create }));
         }
         [HttpPut]
         public async Task<IActionResult> Edit(AppUserDTO appUserDTO)
         {
-            return HandleResult(await Mediator.Send(new Edit.Command { appUserDTO = appUserDTO }));
+            return HandleResult(await Mediator.Send(new Create.Command { appUserDTO = appUserDTO, mode = Application.Core.FormViewMode.Edit }));
         }
-        
-        
+        //[ClaimRequirement(MyClaimTypes.Permission, "CanReadResource")]
+        [Authorize(Role = "administrator", Policy = "IsCurrentUser")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
+        }
 
 
     }

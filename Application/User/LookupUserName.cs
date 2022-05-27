@@ -32,17 +32,16 @@ namespace Application.User
 
                 var appUser = await _userManager.FindByNameAsync(request.UserName);
 
-                if (appUser != null)
+                if (appUser == null)
                     return Result<bool>.Success(true);
                 else
                 {
                     var result = new Result<bool>();
                     result.Value = false;
                     result.IsSuccess = false;
-                    result.Error = "A user with this username already exists in this office, please select another username.";
+                    result.Error = "A user with the username already exists in this office, please select another username.";
                     return result;
                 }
-                
             }
 
             

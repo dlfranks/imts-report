@@ -2,12 +2,13 @@ using System.Text;
 using API.Middleware;
 using API.Services;
 using API.Services.Interfaces;
-using Application.Core;
 using Application.Imts;
 using Application.Interfaces;
 using Application.Repository;
 using Domain;
+using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,7 +50,17 @@ namespace API.Extensions
                 };
                 
             });
+
+            services.AddAuthorization(opt =>
+            {
+                
+                opt.AddPolicy("IsCurrentUser", policy =>
+                {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
             
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<UserService>();
             services.AddScoped<ImtsUserService>();

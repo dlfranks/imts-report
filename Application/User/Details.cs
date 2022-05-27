@@ -1,14 +1,11 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Core;
 using Application.Interfaces;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.User
 {
@@ -37,7 +34,8 @@ namespace Application.User
             public async Task<Result<AppUserDTO>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var officeId = _userAccessor.GetOfficeId();
-                var appUserOfficeRole = await _unitOfWork.Users.getAppUsersOfficeRolesByUserAndOffice(request.Id, officeId);
+                var appUserOfficeRole = await _unitOfWork.Users.getAppUserOfficeRoleByUserAndOffice(request.Id, officeId);
+                if(appUserOfficeRole == null) return Result<AppUserDTO>.Failure("Not Found");
                 var appUserDTO = _mapper.Map<AppUserDTO>(appUserOfficeRole);
                 
                 return Result<AppUserDTO>.Success(appUserDTO);

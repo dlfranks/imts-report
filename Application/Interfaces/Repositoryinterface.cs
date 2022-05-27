@@ -23,16 +23,13 @@ namespace Application.Interfaces
 
     public interface IUserRepository
     {
-        DbSet<AppUser> AppUsers { get; }
-        void updateAppUserOfficeRole(AppUserOfficeRole appUserOfficeRole);
         Task addRoleToUser(string appUserId, int officeId, string roleName);
-        Task<bool> addRoleToUser(AppUser appUser, int officeId, string roleName);
-        IQueryable<AppUserOfficeRole> getAppUsersOfficeRolesByOffice(int officeId);
-        Task<List<AppUserOfficeRole>> getAppUsersOfficeRolesByUser(string userId);
-        Task<AppUserOfficeRole> getAppUsersOfficeRolesByUserAndOffice(string appUserId, int officeId);
-        Task<OfficeRole> getOfficeRoleByUserAndOffice(string userId, int officeId);
+        IQueryable<AppUserOfficeRole> getAppUserOfficeRoleByOffice(int officeId);
+        Task<List<AppUserOfficeRole>> getAppUserOfficeRoleByUser(string userId);
+        Task<AppUserOfficeRole> getAppUserOfficeRoleByUserAndOffice(string appUserId, int officeId);
         Task<OfficeRole> getOfficeRoleByRoleName(string roleName);
-        Task removeRoleFromUser(string appUserId, int officeId, string roleName);
+        Task removeAppUserOfficeRole(string appUserId, int officeId, string roleName);
+        Task removeAppUserOfficeRole(string appUserId, int officeId);
         Task<List<Office>> getImtsOfficesByUser(int imtsEmployeeId);
         Task<List<IDValuePair>> getImtsAllOffices();
 

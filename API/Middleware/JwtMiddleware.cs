@@ -30,12 +30,12 @@ namespace API.Middleware
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                await attachAccountToContext(context, userService, token);
+                attachAccountToContext(context, userService, token);
 
             await _next(context);
         }
 
-        private async Task attachAccountToContext(HttpContext context, UserService userService, string token)
+        private void attachAccountToContext(HttpContext context, UserService userService, string token)
         {
             try
             {
@@ -54,11 +54,13 @@ namespace API.Middleware
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = jwtToken.Claims.First(x => x.Type == "nameid").Value;
                 var officeId = int.Parse(jwtToken.Claims.First(x => x.Type == "officeId").Value);
+                var roleName = jwtToken.Claims.First(x => x.Type == "roleName").Value;
                 var email = jwtToken.Claims.First(x => x.Type == "email").Value;
                 // attach account to context on successful jwt validation
                 context.Items["UserId"] = userId;
                 context.Items["OfficeId"] = officeId;
-                context.Items["CurrentUserSettings"] = await userService.CreateUserSettings();
+                context.Items["RoleName"] = roleName;
+                
             }
             catch (Exception ex)
             {

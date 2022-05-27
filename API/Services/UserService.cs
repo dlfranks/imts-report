@@ -41,10 +41,10 @@ namespace API.Services
             var userId = u.ToString();
             var officeId = int.Parse(o.ToString());
             var us = new UserSetting();
-
-
             var appUser = await _userManager.FindByIdAsync(userId);
-            var appUserOfficeRoles = await _unitOfWork.Users.getAppUsersOfficeRolesByUser(userId);
+            if(appUser == null) return null;
+            var appUserOfficeRoles = await _unitOfWork.Users.getAppUserOfficeRoleByUser(userId);
+            if(appUserOfficeRoles == null) return null;
             us.currentOfficeId = officeId;
             us.imtsEmployeeId = appUser.ImtsEmployeeId;
             us.userName = appUser.UserName;
@@ -71,6 +71,7 @@ namespace API.Services
 
             us.imtsEmployeeId = appUser.ImtsEmployeeId;
             us.IsImtsUser = appUser.IsImtsUser;
+            _httpContextAccessor.HttpContext.Items["CurrentUserSettings"] = us;
             return us;
 
         }

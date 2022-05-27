@@ -18,7 +18,7 @@ namespace Persistence
         {
             base.OnModelCreating(builder);
             builder.Entity<OfficeRole>().HasIndex(q => q.RoleName).IsClustered(false);
-            builder.Entity<AppUserOfficeRole>().HasKey(q => new { q.AppUserId, q.RoleId, q.ImtsOfficeId });
+            builder.Entity<AppUserOfficeRole>().HasKey(q => new { q.AppUserId, q.RoleId, q.ImtsOfficeId});
 
         }
     }

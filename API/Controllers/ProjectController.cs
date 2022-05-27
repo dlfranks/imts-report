@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Services;
 using Application.Interfaces;
-using Domain;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -16,7 +14,8 @@ namespace API.Controllers
     {
         private readonly ImtsContext _imtsContext;
         public ProjectController(
-            ImtsContext imtsContext, IUserAccessor userAccessor) :base(userAccessor)
+            ImtsContext imtsContext, IUserAccessor userAccessor, UserService userService) 
+            :base(userAccessor, userService)
         {
             _imtsContext = imtsContext;
         }

@@ -1,5 +1,8 @@
 using System;
 using System.Text.Json;
+using System.Threading.Tasks;
+using API.Extensions.Filters;
+using API.Services;
 using Application.Core;
 using Application.Interfaces;
 using MediatR;
@@ -9,20 +12,31 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Controllers
 {
+    [ServiceFilter(typeof(UserActionFilter))]
     [ApiController]
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase
     {
         protected readonly IUserAccessor _userAccessor;
+        private readonly UserService _userService;
         private IMediator _mediator;
 
         protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
-        public BaseApiController(IUserAccessor userAccessor)
+        public BaseApiController(IUserAccessor userAccessor, 
+        UserService userService
+        )
         {
             _userAccessor = userAccessor;
+            _userService = userService;
+            
+        }
 
+        protected async Task CreateCurrentUserSettins()
+        {
+            var us = await _userService.CreateUserSettings();
         }
         
+
         protected IActionResult HandleResult<T>(Result<T> result)
         {
             if (result == null) return NotFound();

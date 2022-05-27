@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.Extensions.Filters;
 using API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,9 +23,12 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+            services.AddControllers(_config =>
+            {
+                //_config.Filters.Add(new UserActionFilter());
+            });
 
-
+            
             services.ApplicationServices(_config);
             services.AddIdentityServices(_config);
         }
@@ -44,8 +48,9 @@ namespace API
             app.UseRouting();
             app.UseCors("CorsPolicy");
             //app.UseAuthentication();
-            //app.UseAuthorization();
+            
             app.UseMiddleware<JwtMiddleware>();
+            //app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

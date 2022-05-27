@@ -123,7 +123,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AppUserOfficeRoles");
+                    b.ToTable("AppUserOfficeRoles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.OfficeRole", b =>
@@ -140,7 +140,7 @@ namespace Persistence.Migrations
                     b.HasIndex("RoleName")
                         .HasAnnotation("SqlServer:Clustered", false);
 
-                    b.ToTable("OfficeRoles");
+                    b.ToTable("OfficeRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
