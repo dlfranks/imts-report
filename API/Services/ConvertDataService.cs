@@ -44,7 +44,7 @@ namespace API.Services
                         PropertyInfo rowProp = rowProps[j];
                         table.Columns.Add(rowProp.Name, Nullable.GetUnderlyingType(rowProp.PropertyType) ?? rowProp.PropertyType);
                         propNames[propCount] = rowProp.Name;
-                        if (propNames[propCount] == "castDate" || propNames[propCount] == "projectNo")
+                        if (propNames[propCount].ToString() == "castDate" || propNames[propCount].ToString() == "projectNo")
                         {
                             Console.WriteLine(propNames[propCount]);
                         }
@@ -180,7 +180,7 @@ namespace API.Services
             var options = new JsonSerializerOptions()
             {
                 Converters = { new DataTableConverter(), new DataSetConverter(), new TimeSpanToStringConverter() },
-                IgnoreNullValues = true
+                //IgnoreNullValues = true
 
             };
 

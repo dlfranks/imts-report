@@ -11,13 +11,13 @@ namespace Application.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly Persistence.AppContext _context;
-        private readonly ILogger _logger;
+        private readonly ILogger<UnitOfWork> _logger;
         private readonly ImtsContext _imtsContext;
-        public UnitOfWork(Persistence.AppContext context, ImtsContext imtsContext, ILoggerFactory loggerFactory, UserManager<AppUser> userManager)
+        public UnitOfWork(Persistence.AppContext context, ImtsContext imtsContext, ILogger<UnitOfWork> logger, UserManager<AppUser> userManager)
         {
             _imtsContext = imtsContext;
             _context = context;
-            _logger = loggerFactory.CreateLogger("logs");
+            _logger = logger;
         }
 
         public IUserRepository _Users = null;
@@ -37,7 +37,7 @@ namespace Application.Repository
             get
             {
                 if (_OfficeRoles == null)
-                    _OfficeRoles = new BaseRepository<OfficeRole>(_context, _logger); ;
+                    _OfficeRoles = new BaseRepository<OfficeRole>(_context); ;
                 return _OfficeRoles;
             }
         }
@@ -55,6 +55,7 @@ namespace Application.Repository
             catch (Exception ex)
             {
                 //Elmah
+                _logger.LogError("Cannot save data to the database." + ex);
                 return false;
             }
             return true;

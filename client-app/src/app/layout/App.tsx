@@ -6,11 +6,11 @@ import NavBar from './NavBar';
 import HomePage from '../../features/home/Homepage';
 import { Route, Switch, useLocation } from 'react-router-dom';
 import { useStore } from '../stores/store';
-import LoadingComponent from './LoadingComponents';
 import TestErrors from '../../features/errors/TestErrors';
 import ServerError from '../../features/errors/ServerError';
 import LoginForm from '../../features/users/LoginForm';
 import NotFound from '../../features/errors/NotFound';
+import AppUserDashboard from '../../features/administration/AppUserDashboard';
 
 
 function App() {
@@ -42,6 +42,7 @@ function App() {
                 <Route path='/errors' component={TestErrors} />
                 <Route path='/server-error' component={ServerError} />
                 <Route path='/login' component={LoginForm} />
+                <Route path='/administration' component={AppUserDashboard}/>
                 <Route component={NotFound} />
               </Switch>
             </Container>

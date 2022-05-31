@@ -2,9 +2,10 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { Project } from "../models/coreInterface";
 import { store } from "../stores/store";
 import { ConcreteParam } from '../models/concreteInterface';
-import { User, UserFormValues } from "../models/user";
+import { AppUser, User, UserFormValues } from "../models/user";
 import { toast } from "react-toastify";
 import { history } from '../../index';
+import { request } from "http";
 
 
 const sleep = (delay: number) => {
@@ -14,6 +15,7 @@ const sleep = (delay: number) => {
     })
     
 }
+axios.defaults.baseURL = 'http://localhost:5000/api';
 
 axios.interceptors.request.use(config => {
     const token = store.commonStore.token;
@@ -64,7 +66,7 @@ axios.interceptors.response.use(async response => {
 });
 
 
-axios.defaults.baseURL = 'http://localhost:5000/api';
+
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
@@ -100,10 +102,19 @@ const Account = {
     register: (user: UserFormValues) => requests.post<User>('/account/register', user)
 }
 
+const Administration = {
+    list: () => requests.get<AppUser[]>('/appuser'),
+    create: (appUser: AppUser) => requests.post<AppUser>('/appuser', appUser),
+    details: (id: string) => requests.get<AppUser>(`/appuser/${id}`),
+    update: (appUser: AppUser) => requests.put<AppUser>('/appuser', appUser),
+    delete: (id: string) => requests.del<void>(`/appuser/${id}`)
+}
+
 const agent = {
     Projects,
     Concrete, 
-    Account
+    Account,
+    Administration
 }
 
 export default agent;

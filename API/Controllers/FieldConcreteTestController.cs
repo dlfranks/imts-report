@@ -29,7 +29,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> sampleDatasets()
         {
-            int projectId = 6754;
+            //int projectId = 6754;
             int length = Enum.GetNames(typeof(FieldConcreteDatasetEnum)).Length;
 
 

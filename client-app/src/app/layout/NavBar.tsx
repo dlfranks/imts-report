@@ -14,7 +14,10 @@ export default observer(function NavBar() {
                     Imts Data Portal
                 </Menu.Item>
                 <Menu.Item as={ NavLink} to='/fieldData' name='FieldDataService' />
-                <Menu.Item as={NavLink} to='/errors' name='Errors'/>
+                <Menu.Item as={NavLink} to='/errors' name='Errors' />
+                <Menu.Item as={NavLink} to='/administration' name='administration'/>
+                    
+                
                 
                 <Menu.Item position='right'>
                     <Image src={user?.image || '/assets/user.png'} avatar spaced='right' />
@@ -25,6 +28,7 @@ export default observer(function NavBar() {
                         </Dropdown.Menu>
                     </Dropdown>
                 </Menu.Item>
+                
             </Container>
         </Menu>
     )

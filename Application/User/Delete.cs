@@ -6,6 +6,7 @@ using Application.Interfaces;
 using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace Application.User
 {
@@ -22,9 +23,11 @@ namespace Application.User
 
             private readonly UserManager<AppUser> _userManager;
             private readonly IUserAccessor _userAccessor;
+            private readonly ILogger<Application.User.Delete> _logger;
 
-            public Handler(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, IUserAccessor userAccessor)
+            public Handler(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, IUserAccessor userAccessor, ILogger<Application.User.Delete> logger)
             {
+                _logger = logger;
                 _userAccessor = userAccessor;
                 _userManager = userManager;
                 _unitOfWork = unitOfWork;
@@ -37,7 +40,8 @@ namespace Application.User
                 var userOfficeRole = await _unitOfWork.Users.getAppUserOfficeRoleByUserAndOffice(request.Id, officeId);
 
                 if (userOfficeRole == null) return Result<Unit>.Failure("User Not Found");
-                try{
+                try
+                {
                     await _unitOfWork.Users.removeAppUserOfficeRole(request.Id, officeId);
                     await _unitOfWork.Commit();
 
@@ -45,9 +49,10 @@ namespace Application.User
 
                     if (identityResult.Succeeded) return Result<Unit>.Success(Unit.Value);
 
-                }catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
-                    Result<Unit>.Failure("Sql Error: ");
+                    Result<Unit>.Failure("Sql Error: " + ex);
                 }
                 return Result<Unit>.Failure("Sql Error");
             }

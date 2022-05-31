@@ -40,11 +40,11 @@ namespace Application.Core
                     object columnValue = row[column] == DBNull.Value ? null : row[column];
 
                     // If necessary:
-                    if (options.IgnoreNullValues)
-                    {
+                    // if (options.IgnoreNullValues)
+                    // {
 
-                        // Do null checks on the values here and skip writing.
-                    }
+                    //     Do null checks on the values here and skip writing.
+                    // }
 
                     writer.WritePropertyName(column.ColumnName);
                     JsonSerializer.Serialize(writer, columnValue, options);

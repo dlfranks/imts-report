@@ -15,15 +15,15 @@ namespace Application.Repository
     {
         protected Persistence.AppContext _context;
         internal DbSet<T> _set;
-        public readonly ILogger _logger;
+        
 
         public BaseRepository(
-            Persistence.AppContext context,
-            ILogger logger)
+            Persistence.AppContext context
+            )
         {
             _context = context;
             _set = context.Set<T>();
-            _logger = logger;
+            
         }
 
         public virtual IQueryable<T> get()
@@ -52,7 +52,7 @@ namespace Application.Repository
             }
             catch (Exception e)
             {
-
+                //Elmah
             }
             return original;
         }
