@@ -42,9 +42,9 @@ namespace API.Services
             var officeId = int.Parse(o.ToString());
             var us = new UserSetting();
             var appUser = await _userManager.FindByIdAsync(userId);
-            if(appUser == null) return null;
+            if (appUser == null) return null;
             var appUserOfficeRoles = await _unitOfWork.Users.getAppUserOfficeRoleByUser(userId);
-            if(appUserOfficeRoles == null) return null;
+            if (appUserOfficeRoles == null) return null;
             us.currentOfficeId = officeId;
             us.imtsEmployeeId = appUser.ImtsEmployeeId;
             us.userName = appUser.UserName;
@@ -52,16 +52,19 @@ namespace API.Services
             us.appUserId = userId;
             us.email = appUser.Email;
             us.fullName = appUser.FirstName + " " + appUser.LastName;
-            us.roleName = currentOfficeRole.Role.RoleName;
+
             us._isSuperUser = appUser.IsImtsUser;
+
 
             if (us.isSuperUser)
             {
+                us.roleName = OfficeRoleEnum.Super.ToString().ToLower();
                 us._memberOffices = await _unitOfWork.Users.getImtsAllOffices();
 
             }
             else
             {
+                us.roleName = currentOfficeRole.Role.RoleName;
                 us._memberOffices = appUserOfficeRoles.Select(q => new IDValuePair
                 {
                     id = q.ImtsOfficeId,

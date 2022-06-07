@@ -1,3 +1,7 @@
+export interface IDValuePair{
+    id: number;
+    name: string
+}
 export interface Project {
     id: number;
     number: string;

@@ -22,7 +22,7 @@ export default observer(function HomePage() {
                     userStore.isLoggedIn ? (
                         <>
                             <Header as='h2' inverted content='Welcome to IMTS Data Service' />
-                            <Button as={Link} to='/fieldData' size='huge' inverted>
+                            <Button as={Link} to='/administration' size='huge' inverted>
                                 Go to Service!
                             </Button>
                         </>

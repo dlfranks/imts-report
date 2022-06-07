@@ -95,13 +95,13 @@ namespace API.Controllers
             var user = await _userManager.Users.Where(q => q.Id == currentUserSettings.appUserId).FirstOrDefaultAsync();
             var isUserInOffice = currentUserSettings.isUserInOffice(currentUserSettings.currentOfficeId);
             if (user != null && isUserInOffice)
-                return new
+                return Ok(new
                 {
                     Id = user.Id,
-                    officeId = currentUserSettings.currentOfficeId,
+                    OfficeId = currentUserSettings.currentOfficeId,
                     DisplayName = user.FirstName + " " + user.LastName,
                     MemberOffices = currentUserSettings.memberOffices
-                };
+                });
 
             return BadRequest();
         }
@@ -111,7 +111,7 @@ namespace API.Controllers
             var userDto = new UserDTO
             {
                 Id = user.Id,
-                CurrentOfficeId = officeId,
+                OfficeId = officeId,
                 DisplayName = user.FirstName + " " + user.LastName,
                 Token = _tokenService.generateJwtToken(user, officeId, roleName),
                 Username = user.UserName,

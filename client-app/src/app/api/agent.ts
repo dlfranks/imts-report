@@ -97,9 +97,10 @@ const Concrete = {
 }
 
 const Account = {
-    current: () => requests.get<User>('/account'),
+    current: () => requests.get<User>('/account/getcurrentuser'),
     login: (user: UserFormValues) => requests.post<User>('/account/login', user),
-    register: (user: UserFormValues) => requests.post<User>('/account/register', user)
+    register: (user: UserFormValues) => requests.post<User>('/account/register', user),
+    switchOffice: (officeId: number) => requests.get<User>(`/account/switchoffice?newOfficeId=${officeId}`)
 }
 
 const Administration = {

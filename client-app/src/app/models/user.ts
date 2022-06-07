@@ -1,10 +1,12 @@
+import { IDValuePair } from './coreInterface';
 export interface User {
     id: string;
     username: string;
     displayName: string;
     token: string;
     image?: string;
-    currentOfficeId: number;
+    officeId: number;
+    memberOffices: IDValuePair[];
 
 }
 
