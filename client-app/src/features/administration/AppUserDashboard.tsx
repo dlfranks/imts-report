@@ -4,7 +4,7 @@ import { AppUserColumnsList } from "../../app/models/user";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../app/stores/store";
 import LoadingComponent from "../../app/layout/LoadingComponents";
-import { ThemeProvider, createTheme, Paper, Button, Chip } from "@mui/material";
+import { ThemeProvider, createTheme, Paper, Chip } from "@mui/material";
 
 export default observer(function AppUserDashboard() {
   const { userStore } = useStore();

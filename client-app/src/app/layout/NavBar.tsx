@@ -1,17 +1,12 @@
 //import { Link, NavLink } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
 import { NavLink } from "react-router-dom";
-import { Container, Menu, Button, Image, Dropdown } from "semantic-ui-react";
+import { Container, Menu, Image, Dropdown } from "semantic-ui-react";
 import { useStore } from "../stores/store";
-import UserStore from "../stores/userStore";
-import { IDValuePair, Office } from "../models/coreInterface";
-import MySelectInput from "../common/form/MySelectInput";
-import { isError } from "lodash";
-import { useState } from "react";
 
 export default observer(function NavBar() {
   const {
-    userStore: { user, logout, switchOffice },
+    commonStore: { user, logout, switchOffice },
     } = useStore();
 
     const officeOptions =

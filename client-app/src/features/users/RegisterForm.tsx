@@ -7,11 +7,11 @@ import MyTextInput from "../../app/common/form/MyTextInput";
 import ValidationErrors from "../errors/ValidationErrors";
 
 export default observer(function RegisterForm() {
-    const {userStore} = useStore();
+    const {commonStore} = useStore();
     return (
         <Formik
             initialValues={{displayName: '', username: '', email: '', password: '', error: null}}
-            onSubmit={(values, {setErrors}) => userStore.register(values).catch(error => 
+            onSubmit={(values, {setErrors}) => commonStore.register(values).catch(error => 
                 setErrors({error}))}
             validationSchema={Yup.object({
                 displayName: Yup.string().required(),

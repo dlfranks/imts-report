@@ -1,5 +1,4 @@
 import { observer } from 'mobx-react-lite';
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Image, Container, Header, Segment } from 'semantic-ui-react';
 import { useStore } from '../../app/stores/store';
@@ -10,7 +9,7 @@ import RegisterForm from '../users/RegisterForm';
 
 
 export default observer(function HomePage() {
-    const { userStore, modalStore } = useStore();
+    const { commonStore, modalStore } = useStore();
     return (
         <Segment inverted textAlign='center' vertical className='masthead'>
             <Container style={{ marginTop: '7em' }}>
@@ -19,7 +18,7 @@ export default observer(function HomePage() {
                     IMTS Data Service
                 </Header>
                 {
-                    userStore.isLoggedIn ? (
+                    commonStore.isLoggedIn ? (
                         <>
                             <Header as='h2' inverted content='Welcome to IMTS Data Service' />
                             <Button as={Link} to='/administration' size='huge' inverted>

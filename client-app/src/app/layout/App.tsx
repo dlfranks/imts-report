@@ -16,15 +16,15 @@ import { observer } from "mobx-react-lite";
 
 function App() {
   const location = useLocation();
-  const { commonStore, userStore } = useStore();
+  const { commonStore} = useStore();
 
   useEffect(() => {
     if (commonStore.token) {
-      userStore.getUser().finally(() => commonStore.setAppLoaded());
+      commonStore.getUser().finally(() => commonStore.setAppLoaded());
     } else {
       commonStore.setAppLoaded();
     }
-  }, [userStore, commonStore]);
+  }, [commonStore]);
 
   if (!commonStore.appLoaded)
     return <LoadingComponent content="Loading app..." />;
