@@ -29,25 +29,26 @@ namespace API.Controllers
             return HandleResult(await Mediator.Send(new List.Query()));
 
         }
-        [HttpGet("details")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> Details(string id)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
         }
 
         [HttpGet("lookupusername")]
-        public async Task<IActionResult> LookupUsernameForCreate(string userName)
+        public async Task<IActionResult> LookupUsernameForCreate(string email)
         {
-            return HandleResult(await Mediator.Send(new LookupUserName.Command { UserName = userName }));
+            return HandleResult(await Mediator.Send(new LookupUserName.Command { Email = email }));
         }
         [HttpPost]
         public async Task<IActionResult> Create(AppUserDTO appUserDTO)
         {
             return HandleResult(await Mediator.Send(new Create.Command { appUserDTO = appUserDTO, mode = Application.Core.FormViewMode.Create }));
         }
-        [HttpPut]
-        public async Task<IActionResult> Edit(AppUserDTO appUserDTO)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(string id, AppUserDTO appUserDTO)
         {
+            appUserDTO.Id = id;
             return HandleResult(await Mediator.Send(new Create.Command { appUserDTO = appUserDTO, mode = Application.Core.FormViewMode.Edit }));
         }
         //[ClaimRequirement(MyClaimTypes.Permission, "CanReadResource")]

@@ -14,22 +14,23 @@ namespace Application.Interfaces
         IQueryable<T> get();
         IQueryable<T> get(int id);
         Task add(T newEntity);
-        Task<T> update (T entity);
+        Task<T> update(T entity);
         Task remove(int id);
         void remove(T entity);
-        
-        
+
+
     }
 
     public interface IUserRepository
     {
-        Task addRoleToUser(string appUserId, int officeId, string roleName);
+        Task addRoleToUser(AppUser appUser, int officeId, string roleName);
         IQueryable<AppUserOfficeRole> getAppUserOfficeRoleByOffice(int officeId);
         Task<List<AppUserOfficeRole>> getAppUserOfficeRoleByUser(string userId);
         Task<AppUserOfficeRole> getAppUserOfficeRoleByUserAndOffice(string appUserId, int officeId);
         Task<OfficeRole> getOfficeRoleByRoleName(string roleName);
         Task removeAppUserOfficeRole(string appUserId, int officeId, string roleName);
         Task removeAppUserOfficeRole(string appUserId, int officeId);
+        Task removeAppUserOfficeRoles(string appUserId);
         Task<List<Office>> getImtsOfficesByUser(int imtsEmployeeId);
         Task<List<IDValuePair>> getImtsAllOffices();
 
@@ -39,7 +40,7 @@ namespace Application.Interfaces
     {
         IUserRepository Users { get; }
         IRepository<OfficeRole> OfficeRoles { get; }
-        
+
 
         Task Commit();
         Task<bool> TryCommit();

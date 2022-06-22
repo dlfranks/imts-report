@@ -62,13 +62,14 @@ export default class CommonStore {
     switchOffice = async (officeId: number) => {
         try {
             const user = await agent.Account.switchOffice(officeId);
-            this.setToken(user.token);
+          this.setToken(user.token);
+          console.log(`switched office: ${user.officeId}`);
             runInAction(() => {
                 this.user = { ...this.user, ...user };
                 
             });
-            store.userStore.loadAppUsers();
-            //history.push("/administration");
+            //store.userStore.loadAppUsers();
+            history.push("/administration");
             
         } catch (error) {
             console.log("Switch Office: " + error);

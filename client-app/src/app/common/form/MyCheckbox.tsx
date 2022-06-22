@@ -1,5 +1,5 @@
 import React from 'react';
-import { useField } from 'formik';
+import { useField, FormikProps } from 'formik';
 import { Form, Label } from 'semantic-ui-react';
 
 interface Props {
@@ -7,17 +7,16 @@ interface Props {
     name: string;
     type?: string;
     label?: string;
-    disabled?: boolean;
     onChange?: () => void;
 
 }
 
-export default function MyTextInput(props: Props) {
+export default function MyCheckbox(props: Props) {
     const [field, meta] = useField(props.name);
     return (
         <Form.Field error={meta.touched && !!meta.error}>
             <label>{props.label}</label>
-            <input {...field} {...props} />
+            <input {...field} {...props} checked={field.value} />
             {meta.touched && meta.error ? (
                 <Label basic color='red'>{ meta.error}</Label>
             ) : null}

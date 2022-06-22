@@ -37,23 +37,35 @@ namespace Application.User
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var officeId = _userAccessor.GetOfficeId();
-                var userOfficeRole = await _unitOfWork.Users.getAppUserOfficeRoleByUserAndOffice(request.Id, officeId);
+                var appUser = await _userManager.FindByIdAsync(request.Id);
+                var userOfficeRole = await _unitOfWork.Users.getAppUserOfficeRoleByUser(request.Id);
 
-                if (userOfficeRole == null) return Result<Unit>.Failure("User Not Found");
-                try
+
+                if (appUser == null || userOfficeRole == null) return Result<Unit>.Failure("User Not Found in the office");
+                if(_userAccessor.GetOfficeId() == appUser.MainOfficeId)
                 {
-                    await _unitOfWork.Users.removeAppUserOfficeRole(request.Id, officeId);
-                    await _unitOfWork.Commit();
-
-                    var identityResult = await _userManager.DeleteAsync(userOfficeRole.AppUser);
-
-                    if (identityResult.Succeeded) return Result<Unit>.Success(Unit.Value);
-
-                }
-                catch (Exception ex)
+                    await _unitOfWork.Users.removeAppUserOfficeRoles(appUser.Id);
+                    await _userManager.DeleteAsync(appUser);
+                    if(await _unitOfWork.TryCommit())
+                    {
+                        return Result<Unit>.Success(Unit.Value);
+                    }else{
+                        Result<Unit>.Failure("Sql Error: ");
+                    }
+                }else
                 {
-                    Result<Unit>.Failure("Sql Error: " + ex);
+                    try
+                    {
+                        await _unitOfWork.Users.removeAppUserOfficeRole(request.Id, officeId);
+                        await _unitOfWork.Commit();
+                        return Result<Unit>.Success(Unit.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        Result<Unit>.Failure("Sql Error: " + ex);
+                    }
                 }
+                
                 return Result<Unit>.Failure("Sql Error");
             }
         }

@@ -35,4 +35,12 @@ namespace Application.User
 
 
     }
+
+    public class LookupUserNameDTO
+    {
+        public bool isValidToCreate { get; set; }
+        public AppUserDTO appUserDTO { get; set; }
+        public string errmsg { get; set; }
+        public string succmsg { get; set; }
+    }
 }

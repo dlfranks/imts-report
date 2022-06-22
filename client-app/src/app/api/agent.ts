@@ -2,10 +2,11 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { Project } from "../models/coreInterface";
 import { store } from "../stores/store";
 import { ConcreteParam } from '../models/concreteInterface';
-import { AppUser, User, UserFormValues } from "../models/user";
+import { User, UserFormValues, LookupUser } from '../models/user';
 import { toast } from "react-toastify";
 import { history } from '../../index';
 import { request } from "http";
+import { IAppUser } from '../models/user';
 
 
 const sleep = (delay: number) => {
@@ -103,19 +104,20 @@ const Account = {
     switchOffice: (officeId: number) => requests.get<User>(`/account/switchoffice?newOfficeId=${officeId}`)
 }
 
-const Administration = {
-    list: () => requests.get<AppUser[]>('/appuser'),
-    create: (appUser: AppUser) => requests.post<AppUser>('/appuser', appUser),
-    details: (id: string) => requests.get<AppUser>(`/appuser/${id}`),
-    update: (appUser: AppUser) => requests.put<AppUser>('/appuser', appUser),
-    delete: (id: string) => requests.del<void>(`/appuser/${id}`)
+const AppUser = {
+    list: () => requests.get<IAppUser[]>('/appuser'),
+    create: (appUser: IAppUser) => requests.post<IAppUser>('/appuser', appUser),
+    details: (id: string) => requests.get<IAppUser>(`/appuser/${id}`),
+    update: (appUser: IAppUser) => requests.put<IAppUser>(`/appuser/${appUser.id}`, appUser),
+    delete: (id: string) => requests.del<void>(`/appuser/${id}`),
+    lookupUser: (email: string) => requests.get<LookupUser>(`/appuser/lookupusername?email=${email}`)
 }
 
 const agent = {
     Projects,
     Concrete, 
     Account,
-    Administration
+    AppUser
 }
 
 export default agent;

@@ -87,12 +87,13 @@ namespace Application.Repository
 
 
 
-        public async Task addRoleToUser(string appUserId, int officeId, string roleName)
+        public async Task addRoleToUser(AppUser appUser, int officeId, string roleName)
         {
             var _roleId = await _context.OfficeRoles.Where(q => q.RoleName == roleName).Select(q => q.Id).FirstAsync();
+            
             _context.AppUserOfficeRoles.Add(new AppUserOfficeRole
             {
-                AppUserId = appUserId,
+                AppUser = appUser,
                 RoleId = _roleId,
                 ImtsOfficeId = officeId
             });
@@ -128,7 +129,16 @@ namespace Application.Repository
         {
             return await _context.OfficeRoles.Where(q => q.RoleName == roleName).FirstAsync();
         }
-        
+        public async Task removeAppUserOfficeRoles(string appUserId)
+        {
+
+            var appUserOfficeRoles = await getAppUserOfficeRoleByUser(appUserId);
+            foreach(var a in appUserOfficeRoles)
+            {
+                await removeAppUserOfficeRole(a.AppUserId, a.ImtsOfficeId, a.Role.RoleName);
+            }
+            
+        }
         public async Task removeAppUserOfficeRole(string appUserId, int officeId)
         {
 

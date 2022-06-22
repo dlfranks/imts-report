@@ -7,15 +7,15 @@ interface Props {
     name: string;
     options: any;
     label?: string;
-    onChange: () => void;
+    
 }
 
 export default function MySelectInput(props: Props) {
     const [field, meta, helpers] = useField(props.name);
     return (
         <>
-            <label>{props.label}</label>
-            <div>
+            <div className="field">
+                <label>{props.label}</label>
                 <Select
                     style={{width:300}}
                     clearable
@@ -25,11 +25,12 @@ export default function MySelectInput(props: Props) {
                     onBlur={() => helpers.setTouched(true)}
                     placeholder={props.placeholder}
                 />
-            </div>
-            
-            {meta.touched && meta.error ? (
+                {meta.touched && meta.error ? (
                 <Label basic color='red'>{ meta.error}</Label>
             ) : null}
+            </div>
+            
+            
         </>
     )
 }
