@@ -89,10 +89,11 @@ export default class UserStore {
       const result = await agent.AppUser.list();
       console.log(`finished to load users: ${result} `);
       runInAction(() => {
-        this.users = [];
+        //
+      });
+      this.users = [];
         this.userRegistry = new Map<string, IAppUser>();
         console.log(`this.users cleared `);
-      });
       result.forEach((appUser) => {
         this.setAppUserRegistry(appUser);
         this.setAppUser(appUser);

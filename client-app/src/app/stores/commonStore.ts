@@ -69,7 +69,8 @@ export default class CommonStore {
                 
             });
             //store.userStore.loadAppUsers();
-            history.push("/administration");
+            //history.push("/administration");
+          return user;
             
         } catch (error) {
             console.log("Switch Office: " + error);

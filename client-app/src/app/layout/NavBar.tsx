@@ -1,13 +1,16 @@
-//import { Link, NavLink } from 'react-router-dom';
+//import { Link, NavLink, useLocation, useHistory } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory, useLocation } from "react-router-dom";
 import { Container, Menu, Image, Dropdown } from "semantic-ui-react";
 import { useStore } from "../stores/store";
+
 
 export default observer(function NavBar() {
   const {
     commonStore: { user, logout, switchOffice },
-    } = useStore();
+  } = useStore();
+  
+  const history = useHistory();
 
     const officeOptions =
         user?.memberOffices.map((office) => {
@@ -52,8 +55,11 @@ export default observer(function NavBar() {
             selection
             text={user?.memberOffices[user.officeId - 1].name}
             onChange={(e, d) => {
+              e.preventDefault();
               const officeId: any = d.value;
-              switchOffice(officeId);
+              switchOffice(officeId).then((user) => {
+                history.push("/administration");
+              });
             }}
           />
         </Menu.Item>

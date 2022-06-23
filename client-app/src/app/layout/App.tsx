@@ -45,7 +45,7 @@ function App() {
             <Container style={{width:"98%", paddingTop:"7em" }}>
               <Switch>
                 <Route exact key={location.key} path="/administration" component={AppUserDashboard} />
-                <Route key={location.key} path={['/administration/create', '/administration/:id']} component={AppUserForm} />
+                {/* <Route key={location.key} path={['/administration/create', '/administration/:id']} component={AppUserForm} /> */}
                 <Route exact path="/fieldData" component={DataDashboard} />
                 <Route path="/errors" component={TestErrors} />
                 <Route path="/server-error" component={ServerError} />
