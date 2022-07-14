@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import MaterialTable, { MTableToolbar } from "material-table";
+
 import { AppUserColumnsList, IAppUser } from '../../app/models/user';
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../app/stores/store";
@@ -8,6 +8,8 @@ import { ThemeProvider, createTheme, Paper, Chip } from "@mui/material";
 import { Button } from "semantic-ui-react";
 import { Link, NavLink, useHistory } from 'react-router-dom';
 import { Container } from "@material-ui/core";
+import MaterialTable, { MTableToolbar } from "@material-table/core";
+
 
 export default observer(function AppUserDashboard() {
   const { userStore } = useStore();

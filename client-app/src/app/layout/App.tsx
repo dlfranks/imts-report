@@ -23,7 +23,7 @@ function App() {
 
   useEffect(() => {
     if (commonStore.token) {
-      commonStore.getUser().finally(() => commonStore.setAppLoaded());
+      commonStore.getUserFromServer().finally(() => commonStore.setAppLoaded());
     } else {
       commonStore.setAppLoaded();
     }
@@ -36,7 +36,6 @@ function App() {
       <ToastContainer position="top-right" />
       <ModalContainer />
       <Route exact path="/" component={HomePage} />
-      {/* <Route exact path='/fieldData' component={DataDashboard} /> */}
       <Route
         path={"/(.+)"}
         render={() => (
@@ -44,8 +43,8 @@ function App() {
             <NavBar />
             <Container style={{width:"98%", paddingTop:"7em" }}>
               <Switch>
-                <Route exact key={location.key} path="/administration" component={AppUserDashboard} />
-                {/* <Route key={location.key} path={['/administration/create', '/administration/:id']} component={AppUserForm} /> */}
+                <Route exact path="/administration" component={AppUserDashboard} />
+                <Route key={location.key} path={['/administration/create', '/administration/:id']} component={AppUserForm} />
                 <Route exact path="/fieldData" component={DataDashboard} />
                 <Route path="/errors" component={TestErrors} />
                 <Route path="/server-error" component={ServerError} />

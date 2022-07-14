@@ -46,6 +46,16 @@ namespace API.Controllers
                 return NotFound();
             return BadRequest(result.Error);
         }
+
+        protected IActionResult ModelErrorHandleResult<T>(ModelErrorResult<T> result)
+        {
+            if (result == null) return NotFound();
+            if (result.IsSuccess && result.Value != null)
+                return Ok(result.Value);
+            if (result.IsSuccess && result.Value == null)
+                return NotFound();
+            return BadRequest(result.ModelErrors);
+        }
         protected IActionResult HandleJsonResult<T>(Result<T> result)
         {
             if (result == null) return NotFound();

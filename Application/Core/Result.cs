@@ -15,6 +15,15 @@ namespace Application.Core
         public static Result<T> Failure(string error) => new Result<T> { IsSuccess = false, Error = error };
     }
 
+    public class ModelErrorResult<T> : Result<T>
+    {
+        public ModelErrorResult()
+        {
+            ModelErrors = new Dictionary<string, string>();
+        }
+        public Dictionary<string, string> ModelErrors { get; set; }
+    }
+
     public class PagedList<T> : List<T>
     {
         public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)

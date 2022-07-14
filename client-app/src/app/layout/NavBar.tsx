@@ -1,39 +1,34 @@
 //import { Link, NavLink, useLocation, useHistory } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
-import { NavLink, useHistory, useLocation } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { Container, Menu, Image, Dropdown } from "semantic-ui-react";
 import { useStore } from "../stores/store";
-
 
 export default observer(function NavBar() {
   const {
     commonStore: { user, logout, switchOffice },
   } = useStore();
-  
+
   const history = useHistory();
 
-    const officeOptions =
-        user?.memberOffices.map((office) => {
-            if (office.id === user.officeId) {
-                return {
-                    key: office.id,
-                    text: office.name,
-                    value: office.id,
-                    selected: true,
-                    active: true
-                };
-            } else {
-                return {
-                    key: office.id,
-                    text: office.name,
-                    value: office.id
-                };
-            }
-            
-        });
-    
+  const officeOptions = user?.memberOffices.map((office) => {
+    if (office.id === user.currentOfficeId) {
+      return {
+        key: office.id,
+        text: office.name,
+        value: office.id,
+        selected: true,
+        active: true,
+      };
+    } else {
+      return {
+        key: office.id,
+        text: office.name,
+        value: office.id,
+      };
+    }
+  });
 
-    
   return (
     <Menu inverted fixed="top">
       <Container>
@@ -53,13 +48,11 @@ export default observer(function NavBar() {
             pointing="top right"
             options={officeOptions}
             selection
-            text={user?.memberOffices[user.officeId - 1].name}
+            text={user?.currentOffice?.name}
             onChange={(e, d) => {
               e.preventDefault();
-              const officeId: any = d.value;
-              switchOffice(officeId).then((user) => {
-                history.push("/administration");
-              });
+              const officeId : any = d.value;
+              if (officeId !== user?.currentOfficeId) switchOffice(officeId);
             }}
           />
         </Menu.Item>

@@ -34,6 +34,7 @@ export default class UserStore {
       this.setAppUser(newAppUser);
     } catch (error) {
       console.log(error);
+      return error;
     }
   };
   updateAppUser = async (appUser: IAppUser) => {
@@ -89,16 +90,16 @@ export default class UserStore {
       const result = await agent.AppUser.list();
       console.log(`finished to load users: ${result} `);
       runInAction(() => {
-        //
-      });
-      this.users = [];
+        this.users = [];
         this.userRegistry = new Map<string, IAppUser>();
         console.log(`this.users cleared `);
-      result.forEach((appUser) => {
+        result.forEach((appUser) => {
         this.setAppUserRegistry(appUser);
         this.setAppUser(appUser);
         console.log(`each user : ${appUser}`);
       });
+      });
+      
       console.log(`this.users completed`);
       
       this.setLoadingInitial(false);

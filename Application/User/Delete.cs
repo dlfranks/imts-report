@@ -42,6 +42,7 @@ namespace Application.User
 
 
                 if (appUser == null || userOfficeRole == null) return Result<Unit>.Failure("User Not Found in the office");
+                if(appUser.Id == _userAccessor.GetUserId()) return Result<Unit>.Failure("Can't delete yourself.");
                 if(_userAccessor.GetOfficeId() == appUser.MainOfficeId)
                 {
                     await _unitOfWork.Users.removeAppUserOfficeRoles(appUser.Id);

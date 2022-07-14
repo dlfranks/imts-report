@@ -60,7 +60,6 @@ namespace Application.User
                             imtsUser = await findImtsUser(request.appUserDTO.ImtsUserName);
                             if (imtsUser != null)
                             {
-                                request.appUserDTO.MainOfficeId = imtsUser.mainOfficeId;
                                 request.appUserDTO.ImtsEmployeeId = imtsUser.id;
                             }
                             else
@@ -75,14 +74,18 @@ namespace Application.User
                     IdentityResult result;
                     if (appUser == null)
                     {
-                        result = await createAppUser(request.appUserDTO);
+                        if(string.IsNullOrWhiteSpace(request.appUserDTO.Password))
+                            return Result<Unit>.Failure("Password required");
+                        appUser = createAppUser(request.appUserDTO);
+                        result = await _userManager.CreateAsync(appUser, request.appUserDTO.Password);
                         if (result.Succeeded)
                         {
-                            //var appUserOfficeroleResult = await createAppUserOfficeRole(appUser.Id, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
                             await _unitOfWork.Users.addRoleToUser(appUser, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
-                            if (await _unitOfWork.TryCommit())
+                            var succeeded = await _unitOfWork.TryCommit();
+                            if (succeeded)
                                 return Result<Unit>.Success(Unit.Value);
-                            else return Result<Unit>.Failure("Failed to create the user in the office");
+                            else
+                                return Result<Unit>.Failure("Failed to create the user in the office");
 
                         }
                         else
@@ -98,7 +101,7 @@ namespace Application.User
                         if (result.Succeeded)
                         {
 
-                            //var appUserOfficeroleResult = await createAppUserOfficeRole(appUser.Id, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
+
                             await _unitOfWork.Users.addRoleToUser(appUser, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
                             if (await _unitOfWork.TryCommit())
                                 return Result<Unit>.Success(Unit.Value);
@@ -143,21 +146,25 @@ namespace Application.User
                         if (result.Succeeded)
                         {
                             var appUserOfficerole = await _unitOfWork.Users.getAppUserOfficeRoleByUserAndOffice(appUser.Id, _userAccessor.GetOfficeId());
-                            if(appUserOfficerole.Role.RoleName != request.appUserDTO.RoleName)
+                            if (appUserOfficerole.Role.RoleName != request.appUserDTO.RoleName)
                             {
-                                var appUserOfficeroleResult = await createAppUserOfficeRole(appUser, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
+                                await _unitOfWork.Users.removeAppUserOfficeRole(appUser.Id, _userAccessor.GetOfficeId());
+                                await _unitOfWork.Users.addRoleToUser(appUser, _userAccessor.GetOfficeId(), request.appUserDTO.RoleName);
+                                var succeeded = await _unitOfWork.TryCommit();
+                                if (!succeeded)
+                                    return Result<Unit>.Failure("Failed to update the user role");
                             }
-                            
-                            return Result<Unit>.Success(Unit.Value);
                         }
                         else
                         {
                             return Result<Unit>.Failure("Failed to update the user");
                         }
-
-
                     }
-                    return Result<Unit>.Failure("User Not FOund");
+                    else
+                    {
+                        return Result<Unit>.Failure("User Not FOund");
+                    }
+                    return Result<Unit>.Success(Unit.Value);
                 }
             }
             private void updateAppUser(AppUser user, AppUserDTO appUserDTO)
@@ -172,13 +179,13 @@ namespace Application.User
                 user.ImtsUserName = appUserDTO.IsImtsUser ? appUserDTO.ImtsUserName : null;
                 user.ImtsEmployeeId = appUserDTO.IsImtsUser ? appUserDTO.ImtsEmployeeId : null;
             }
-            private async Task<IdentityResult> createAppUser(AppUserDTO appUserDTO)
+            private AppUser createAppUser(AppUserDTO appUserDTO)
             {
                 var user = new AppUser();
                 user.CreateDate = DateTime.Now;
                 user.MainOfficeId = _userAccessor.GetOfficeId();
-                user.Email = appUserDTO.Email;
-                user.UserName = appUserDTO.Email;
+                user.Email = appUserDTO.Email.ToLower();
+                user.UserName = appUserDTO.Email.ToLower();
                 user.FirstName = appUserDTO.FirstName;
                 user.LastName = appUserDTO.LastName;
                 user.IsImtsUser = appUserDTO.IsImtsUser;
@@ -186,15 +193,7 @@ namespace Application.User
                 user.ImtsUserName = appUserDTO.IsImtsUser ? appUserDTO.ImtsUserName : null;
                 user.ImtsEmployeeId = appUserDTO.IsImtsUser ? appUserDTO.ImtsEmployeeId : null;
 
-                return await _userManager.CreateAsync(user, appUserDTO.Password);
-            }
-            private async Task<bool> createAppUserOfficeRole(AppUser appUser, int officeId, string roleName)
-            {
-                await _unitOfWork.Users.removeAppUserOfficeRole(appUser.Id, _userAccessor.GetOfficeId());
-                await _unitOfWork.Users.addRoleToUser(appUser, officeId, roleName);
-                
-                return await _unitOfWork.TryCommit();
-
+                return user;
             }
             private async Task<Employee> findImtsUser(string userName)
             {

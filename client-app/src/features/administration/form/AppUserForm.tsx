@@ -16,17 +16,31 @@ import { toast } from "react-toastify";
 export default observer(function AppUserForm() {
   const history = useHistory();
   const { userStore, commonStore } = useStore();
-  const { createAppUser, updateAppUser, loadAppUser, lookupUsername,  deleteAppUser} = userStore;
+  const { createAppUser, updateAppUser, loadAppUser, lookupUsername, deleteAppUser } = userStore;
+  const {getUser } = commonStore;
   const { id } = useParams<{ id: string }>();
   const [appUser, setAppUser] = useState<AppUser>(new AppUser());
   const [createMode, setCreateMode] = useState<boolean>(false);
+  const [newUserMode, setNewUserMode] = useState<boolean>(false);
 
-  const validationSchema = Yup.object({
+  let validationSchema = Yup.object({
     firstName: Yup.string().required("Required"),
     lastName: Yup.string().required("Required"),
     email: Yup.string().required("Required").email(),
     roleName: Yup.string().required("Required"),
+    
   });
+
+  if (newUserMode)
+  {
+    validationSchema = Yup.object({
+      firstName: Yup.string().required("Required"),
+      lastName: Yup.string().required("Required"),
+      email: Yup.string().required("Required").email(),
+      roleName: Yup.string().required("Required"),
+      password:Yup.string().required()
+    });
+  }
 
   function handleFormSubmit(appUser: AppUser) {
 
@@ -34,8 +48,10 @@ export default observer(function AppUserForm() {
       let newAppuser = {
         ...appUser,
       };
-      createAppUser(newAppuser).then(() => {
+      createAppUser(newAppuser).then((result) => {
         history.push(`/administration`);
+      }, (error) => {
+        console.log(error);
       });
     } else {
 
@@ -69,12 +85,14 @@ export default observer(function AppUserForm() {
           setAppUser(result.appUserDTO);
         else {
           let user = new AppUser();
-          setAppUser({...user, email: email});
+          setAppUser({ ...user, email: email });
+          setNewUserMode(true);
         }
         setCreateMode(true);
         toast.success(result.succmsg, {autoClose: false});
       } else {
         setCreateMode(false);
+        setNewUserMode(false);
         toast.error(result?.errmsg, {autoClose: false});
       }
     });
@@ -147,21 +165,28 @@ export default observer(function AppUserForm() {
             type="button"
             content="Cancel"
           />
-          <Button
-            negative
-            floated="right"
-            type="button"
-            content="Delete"
-            onClick={() => {
-              if (id)
-              {
-                deleteAppUser(id).then(() => {
-                  history.push('/administration');
-                });
-              }
-              
-            }}
-          />
+          {
+            ((deleteButtonVisibility())?
+            (
+              <Button
+              negative
+              floated="right"
+              type="button"
+              content="Delete"
+              onClick={() => {
+                if (id)
+                {
+                  deleteAppUser(id).then(() => {
+                    history.push('/administration');
+                  });
+                }
+                
+              }}
+            />
+            ) : (null))
+          
+          }
+          
         </>
       );
     else return null;
@@ -169,6 +194,7 @@ export default observer(function AppUserForm() {
 
   const lookupButtonVisibility = () => (createMode === false) && !(appUser.id) ? 'display' : 'none';
   const lookupEmailVisibility = () => (createMode === false) && !(appUser.id) ? false : true;
+  const deleteButtonVisibility = () => (createMode === true || appUser.id === getUser()?.id ? false : true);
 
   useEffect(() => {
     if (id) {
@@ -178,6 +204,7 @@ export default observer(function AppUserForm() {
     }
   }, [id, loadAppUser]);
 
+  
   return (
     <Segment clearing>
       <Header

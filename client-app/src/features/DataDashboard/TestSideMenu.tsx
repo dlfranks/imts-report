@@ -2,7 +2,7 @@ import React from 'react';
 import { Header, Menu } from 'semantic-ui-react';
 import Calendar from 'react-calendar';
 
-export default function TestList() {
+export default function TestSideMenu() {
     
     return (
         <>

@@ -30,6 +30,7 @@ export function isPrimitive(value: any): value is PrimitiveType {
 
 export interface MinTableItem {
   id: PrimitiveType;
+  datasetName: PrimitiveType;
 }
 
 export type TableHeaders<T extends MinTableItem> = Record<keyof T, string>;
@@ -45,36 +46,47 @@ interface TableProps<T extends MinTableItem> {
 }
 
 export default function MyTable<T extends MinTableItem>(props: TableProps<T>) {
-  function renderRow(item: T) {
+  function renderRow(item: T, index:number) {
     return (
-      <Table.Row>
-        {objectKeys(item).map((itemProperty) => {
+      <Table.Row key={Math.random() + '-' + index}>
+        {objectKeys(item).map((itemProperty, index) => {
           const customRenderer = props.customRenderers?.[itemProperty];
 
           if (customRenderer) {
-            return <Table.Cell >{customRenderer(item)}</Table.Cell>;
+            return <Table.Cell><div>{customRenderer(item)}</div></Table.Cell>;
           }
 
           return (
-            <Table.Cell style={{ 'text-overflow': 'ellipsis', 'overflow': 'hidden', 'white-space':'nowrap' }}>{isPrimitive(item[itemProperty]) ? item[itemProperty] : ""}</Table.Cell>
+            <Table.Cell
+              style={{
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+              }}
+              key={Math.random() + '-' + index}
+            >
+              <div>{isPrimitive(item[itemProperty]) ? item[itemProperty] : ""}</div>
+            </Table.Cell>
           );
         })}
       </Table.Row>
     );
   }
 
-    return (
-        <div className='container_table'>
-          <Table celled>
-            <Table.Header>
-              <Table.Row>
-                {objectValues(props.headers).map((headerValue) => (
-                  <Table.HeaderCell key={headerValue}>{headerValue}</Table.HeaderCell>
-                ))}
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>{props.items.map(renderRow)}</Table.Body>
-              </Table>
-        </div>
+  return (
+    <div className="container_table">
+      <Table celled>
+        <Table.Header>
+          <Table.Row>
+            {objectValues(props.headers).map((headerValue) => (
+              <Table.HeaderCell key={headerValue}>
+                {headerValue}
+              </Table.HeaderCell>
+            ))}
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>{props.items.map(renderRow)}</Table.Body>
+      </Table>
+    </div>
   );
 }

@@ -49,11 +49,11 @@ export default observer(function DataList() {
                 <Header as='h3' content='Concrete Data' />
                 <Divider />
                 <Header as='h4' content='Full Dataset' />
-                    <MyTable items={ samples.full} headers={headers(samples.full[0])}/>
-                    <Header as='h4' content='Mix Number Dataset' />
-                    <MyTable items={samples.strength} headers={headers(samples.strength[0])}/>
-                    <Header as='h4' content='Strength Dataset' />
-                    <MyTable items={samples.mixNumber}  headers={headers(samples.mixNumber[0])}/>
+                <MyTable items={ samples.full} headers={headers(samples.full[0])}/>
+                <Header as='h4' content='Mix Number Dataset' />
+                <MyTable items={samples.strength} headers={headers(samples.strength[0])}/>
+                <Header as='h4' content='Strength Dataset' />
+                <MyTable items={samples.mixNumber}  headers={headers(samples.mixNumber[0])}/>
             </Container>
             <Container style={{margin:'5em 0'}}>
                 <DataRequestForm />

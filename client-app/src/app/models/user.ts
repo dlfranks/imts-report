@@ -6,7 +6,8 @@ export interface User {
   displayName: string;
   token: string;
   image?: string;
-  officeId: number;
+  currentOfficeId: number;
+  currentOffice: IDValuePair;
   memberOffices: IDValuePair[];
 }
 
@@ -28,8 +29,6 @@ export interface IAppUser {
   password?: string;
   roleName: string;
 }
-
-
 
 export class AppUser implements IAppUser {
   id?: string = undefined;
