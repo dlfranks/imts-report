@@ -5,61 +5,68 @@ import { Button, Form, Header, Segment } from "semantic-ui-react";
 import MySelectInput from "../../../app/common/form/MySelectInput";
 import MyTextInput from "../../../app/common/form/MyTextInput";
 import { useStore } from "../../../app/stores/store";
-import { AppUser} from "../../../app/models/user";
+import { AppUser } from "../../../app/models/user";
 import * as Yup from "yup";
 import { RoleOptions } from "../../../app/common/options/Urls";
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useParams, useHistory } from "react-router-dom";
 import MyCheckbox from "../../../app/common/form/MyCheckbox";
 import { toast } from "react-toastify";
-
 
 export default observer(function AppUserForm() {
   const history = useHistory();
   const { userStore, commonStore } = useStore();
-  const { createAppUser, updateAppUser, loadAppUser, lookupUsername, deleteAppUser } = userStore;
-  const {getUser } = commonStore;
+  const {
+    createAppUser,
+    updateAppUser,
+    loadAppUser,
+    lookupUsername,
+    deleteAppUser,
+  } = userStore;
+  const { getUser } = commonStore;
   const { id } = useParams<{ id: string }>();
   const [appUser, setAppUser] = useState<AppUser>(new AppUser());
   const [createMode, setCreateMode] = useState<boolean>(false);
   const [newUserMode, setNewUserMode] = useState<boolean>(false);
+  const [isSubmit, setIsSubmit] = useState<boolean>(false);
 
   let validationSchema = Yup.object({
     firstName: Yup.string().required("Required"),
     lastName: Yup.string().required("Required"),
     email: Yup.string().required("Required").email(),
     roleName: Yup.string().required("Required"),
-    
   });
 
-  if (newUserMode)
-  {
+  if (newUserMode) {
     validationSchema = Yup.object({
       firstName: Yup.string().required("Required"),
       lastName: Yup.string().required("Required"),
       email: Yup.string().required("Required").email(),
       roleName: Yup.string().required("Required"),
-      password:Yup.string().required()
+      password: Yup.string().required(),
     });
   }
 
   function handleFormSubmit(appUser: AppUser) {
-
-    if (!id){
+    setIsSubmit(true);
+    if (!id) {
       let newAppuser = {
         ...appUser,
       };
-      createAppUser(newAppuser).then((result) => {
-        history.push(`/administration`);
-      }, (error) => {
-        console.log(error);
-      });
+      createAppUser(newAppuser).then(
+        (result) => {
+          //history.push(`/administration`);
+          setIsSubmit(false);
+        },
+        (error) => {
+          console.log(error);
+          setIsSubmit(false);
+        }
+      );
     } else {
-
       updateAppUser(appUser).then(() => {
         history.push(`/administration`);
-      })
-      }
-    
+      });
+    }
   }
 
   const showAndHideElement = (props: FormikProps<any>) => {
@@ -81,26 +88,24 @@ export default observer(function AppUserForm() {
     e.preventDefault();
     lookupUsername(email).then((result) => {
       if (result?.isValidToCreate) {
-        if (result.appUserDTO)
-          setAppUser(result.appUserDTO);
+        if (result.appUserDTO) setAppUser(result.appUserDTO);
         else {
           let user = new AppUser();
           setAppUser({ ...user, email: email });
           setNewUserMode(true);
         }
         setCreateMode(true);
-        toast.success(result.succmsg, {autoClose: false});
+        toast.success(result.succmsg, { autoClose: false });
       } else {
         setCreateMode(false);
         setNewUserMode(false);
-        toast.error(result?.errmsg, {autoClose: false});
+        toast.error(result?.errmsg, { autoClose: false });
       }
     });
   };
   const changeHandlerIsImtsUser = (props: FormikProps<any>) => {
-    let user = { ...props.values, isImtsUser: !props.values.isImtsUser};
+    let user = { ...props.values, isImtsUser: !props.values.isImtsUser };
     setAppUser(user);
-    
   };
   const changeHandlerPassword = () => {
     let newUserOrSelf = false;
@@ -143,7 +148,7 @@ export default observer(function AppUserForm() {
 
           <MyCheckbox
             name="isImtsUser"
-            label="Are you a IMTS user?"
+            label="Are you an IMTS user?"
             type="checkbox"
             onChange={() => changeHandlerIsImtsUser(props)}
           />
@@ -151,8 +156,8 @@ export default observer(function AppUserForm() {
           {showAndHideElement(props)}
 
           <Button
-            disabled={props.isSubmitting || !props.isValid}
-            loading={props.isSubmitting}
+            disabled={isSubmit || !props.isValid}
+            loading={isSubmit}
             floated="right"
             positive
             type="submit"
@@ -165,36 +170,32 @@ export default observer(function AppUserForm() {
             type="button"
             content="Cancel"
           />
-          {
-            ((deleteButtonVisibility())?
-            (
-              <Button
+          {deleteButtonVisibility() ? (
+            <Button
               negative
               floated="right"
               type="button"
               content="Delete"
               onClick={() => {
-                if (id)
-                {
+                if (id) {
                   deleteAppUser(id).then(() => {
-                    history.push('/administration');
+                    history.push("/administration");
                   });
                 }
-                
               }}
             />
-            ) : (null))
-          
-          }
-          
+          ) : null}
         </>
       );
     else return null;
   };
 
-  const lookupButtonVisibility = () => (createMode === false) && !(appUser.id) ? 'display' : 'none';
-  const lookupEmailVisibility = () => (createMode === false) && !(appUser.id) ? false : true;
-  const deleteButtonVisibility = () => (createMode === true || appUser.id === getUser()?.id ? false : true);
+  const lookupButtonVisibility = () =>
+    createMode === false && !appUser.id ? "display" : "none";
+  const lookupEmailVisibility = () =>
+    createMode === false && !appUser.id ? false : true;
+  const deleteButtonVisibility = () =>
+    createMode === true || appUser.id === getUser()?.id ? false : true;
 
   useEffect(() => {
     if (id) {
@@ -204,7 +205,6 @@ export default observer(function AppUserForm() {
     }
   }, [id, loadAppUser]);
 
-  
   return (
     <Segment clearing>
       <Header
@@ -229,7 +229,8 @@ export default observer(function AppUserForm() {
             <Segment>
               <MyTextInput
                 placeholder="Emial"
-                name="email" label="Email"
+                name="email"
+                label="Email"
                 disabled={lookupEmailVisibility()}
               />
               <Button

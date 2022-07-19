@@ -8,6 +8,7 @@ using Application.Interfaces;
 using Domain;
 using Domain.imts;
 using FluentValidation;
+
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ namespace Application.User
 {
     public class Create
     {
+
         public class Command : IRequest<Result<Unit>>
         {
             public FormViewMode mode { get; set; }
@@ -48,27 +50,13 @@ namespace Application.User
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
+                var modelErrors = new ModelErrorResult<Unit>();
                 Employee imtsUser = null;
-                //Create
+                //Create 
                 if (request.mode == FormViewMode.Create)
                 {
                     //If Imts user
-                    if (request.appUserDTO.IsImtsUser)
-                    {
-                        if (!String.IsNullOrWhiteSpace(request.appUserDTO.ImtsUserName))
-                        {
-                            imtsUser = await findImtsUser(request.appUserDTO.ImtsUserName);
-                            if (imtsUser != null)
-                            {
-                                request.appUserDTO.ImtsEmployeeId = imtsUser.id;
-                            }
-                            else
-                            {
-                                return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + " failed to find the IMTS user");
-                            }
-                        }
-
-                    }
+                    if(!(await validateImtsUser(request.appUserDTO, modelErrors))) return modelErrors;
                     //is an existed user?
                     var appUser = await _userManager.FindByEmailAsync(request.appUserDTO.Email);
                     IdentityResult result;
@@ -76,7 +64,8 @@ namespace Application.User
                     {
                         if(string.IsNullOrWhiteSpace(request.appUserDTO.Password))
                             return Result<Unit>.Failure("Password required");
-                        appUser = createAppUser(request.appUserDTO);
+                        appUser = new AppUser();
+                        CreateAppUserModel(appUser, request.appUserDTO);
                         result = await _userManager.CreateAsync(appUser, request.appUserDTO.Password);
                         if (result.Succeeded)
                         {
@@ -96,7 +85,7 @@ namespace Application.User
                     }
                     else
                     {
-                        updateAppUser(appUser, request.appUserDTO);
+                        CreateAppUserModel(appUser, request.appUserDTO);
                         result = await _userManager.UpdateAsync(appUser);
                         if (result.Succeeded)
                         {
@@ -123,24 +112,12 @@ namespace Application.User
                     AppUser appUser = await _userManager.Users.Where(q => q.Id == request.appUserDTO.Id).FirstOrDefaultAsync();
                     if (appUser != null)
                     {
-                        updateAppUser(appUser, request.appUserDTO);
+                        
                         //If Imts user
-                        if (appUser.IsImtsUser)
-                        {
-                            if (!String.IsNullOrWhiteSpace(appUser.ImtsUserName))
-                            {
-                                imtsUser = await findImtsUser(appUser.ImtsUserName);
-                                if (imtsUser != null)
-                                {
-                                    appUser.ImtsEmployeeId = imtsUser.id;
-                                }
-                                else
-                                {
-                                    return Result<Unit>.Failure(request.appUserDTO.ImtsUserName + " failed to find the IMTS user");
-                                }
-                            }
+                        if(!(await validateImtsUser(request.appUserDTO, modelErrors))) return modelErrors;
 
-                        }
+                        CreateAppUserModel(appUser, request.appUserDTO);
+
                         IdentityResult result;
                         result = await _userManager.UpdateAsync(appUser);
                         if (result.Succeeded)
@@ -167,34 +144,53 @@ namespace Application.User
                     return Result<Unit>.Success(Unit.Value);
                 }
             }
-            private void updateAppUser(AppUser user, AppUserDTO appUserDTO)
+            private async Task<bool> validateImtsUser(AppUserDTO appUserDTO, ModelErrorResult<Unit> modelErrors)
             {
-                user.Email = appUserDTO.Email;
-                user.UserName = appUserDTO.Email;
+                var valid = true;
+
+                if (appUserDTO.IsImtsUser)
+                {
+                    if (!String.IsNullOrWhiteSpace(appUserDTO.ImtsUserName))
+                    {
+                        var imtsUser = await findImtsUser(appUserDTO.ImtsUserName);
+                        if (imtsUser != null)
+                        {
+                            appUserDTO.ImtsEmployeeId = imtsUser.id;
+                        }
+                        else
+                        {
+                            modelErrors.ModelErrors.Add("IsImtsUserName ", appUserDTO.ImtsUserName + " Not valid IMTS username.");
+                            valid = false;
+                        }
+                    }else
+                    {
+                        valid = false;
+                        modelErrors.ModelErrors.Add("IsImtsUserName ", appUserDTO.ImtsUserName + " Not valid IMTS username.");
+                    }
+                }else{
+                    appUserDTO.ImtsUserName = null;
+                    appUserDTO.ImtsEmployeeId = null;
+                }
+                return valid;
+            }
+            private void CreateAppUserModel(AppUser user, AppUserDTO appUserDTO)
+            {
+                if(string.IsNullOrWhiteSpace(appUserDTO.Id))
+                {
+                    user = new AppUser();
+                    user.CreateDate = DateTime.Now;
+                }
+                user.Email = appUserDTO.Email.ToLower();
+                user.UserName = appUserDTO.Email.ToLower();
                 user.FirstName = appUserDTO.FirstName;
                 user.LastName = appUserDTO.LastName;
                 user.MainOfficeId = user.MainOfficeId == 0 ? _userAccessor.GetOfficeId() : user.MainOfficeId;
                 user.IsImtsUser = appUserDTO.IsImtsUser;
                 user.UpdatedDate = DateTime.Now;
-                user.ImtsUserName = appUserDTO.IsImtsUser ? appUserDTO.ImtsUserName : null;
-                user.ImtsEmployeeId = appUserDTO.IsImtsUser ? appUserDTO.ImtsEmployeeId : null;
+                user.ImtsUserName = appUserDTO.ImtsUserName;
+                user.ImtsEmployeeId = appUserDTO.ImtsEmployeeId;
             }
-            private AppUser createAppUser(AppUserDTO appUserDTO)
-            {
-                var user = new AppUser();
-                user.CreateDate = DateTime.Now;
-                user.MainOfficeId = _userAccessor.GetOfficeId();
-                user.Email = appUserDTO.Email.ToLower();
-                user.UserName = appUserDTO.Email.ToLower();
-                user.FirstName = appUserDTO.FirstName;
-                user.LastName = appUserDTO.LastName;
-                user.IsImtsUser = appUserDTO.IsImtsUser;
-                user.UpdatedDate = DateTime.Now;
-                user.ImtsUserName = appUserDTO.IsImtsUser ? appUserDTO.ImtsUserName : null;
-                user.ImtsEmployeeId = appUserDTO.IsImtsUser ? appUserDTO.ImtsEmployeeId : null;
-
-                return user;
-            }
+            
             private async Task<Employee> findImtsUser(string userName)
             {
                 return await _imtsUserService.GetImtsUserByUserName(userName);

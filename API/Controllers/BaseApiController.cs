@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Extensions.Filters;
@@ -22,29 +23,47 @@ namespace API.Controllers
         private IMediator _mediator;
 
         protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
-        public BaseApiController(IUserAccessor userAccessor, 
+        public BaseApiController(IUserAccessor userAccessor,
         UserService userService
         )
         {
             _userAccessor = userAccessor;
             _userService = userService;
-            
+
         }
 
         protected async Task CreateCurrentUserSettins()
         {
             var us = await _userService.CreateUserSettings();
         }
-        
+
 
         protected IActionResult HandleResult<T>(Result<T> result)
         {
+            Type resultType = typeof(Result<T>);
+            Type modelErrorResultType = typeof(ModelErrorResult<T>);
+            if (result.GetType().Equals(modelErrorResultType))
+            {
+                var modelErrorResult = (ModelErrorResult<T>)result;
+                if (modelErrorResult.ModelErrors.Count > 0)
+                {
+                    IDictionary<string, string> modelErrors = new Dictionary<string, string>();
+                    foreach (var e in modelErrorResult.ModelErrors)
+                    {
+                        ModelState.AddModelError(e.Key, e.Value);
+                    }
+
+                }
+                
+                return BadRequest(modelErrorResult);
+            }
             if (result == null) return NotFound();
             if (result.IsSuccess && result.Value != null)
                 return Ok(result.Value);
             if (result.IsSuccess && result.Value == null)
                 return NotFound();
-            return BadRequest(result.Error);
+
+            return BadRequest(result);
         }
 
         protected IActionResult ModelErrorHandleResult<T>(ModelErrorResult<T> result)

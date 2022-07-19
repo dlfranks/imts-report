@@ -1,8 +1,8 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
-import { IAppUser, AppUser } from '../models/user';
-
-
+import { IAppUser, AppUser } from "../models/user";
+import { ServerError } from "../models/serverError";
+import { history } from "../..";
 
 export default class UserStore {
   users: IAppUser[] = [];
@@ -28,31 +28,41 @@ export default class UserStore {
     return this.userRegistry.get(id);
   };
   createAppUser = async (appUser: IAppUser) => {
-    try {
-      await agent.AppUser.create(appUser);
-      const newAppUser = new AppUser(appUser);
-      this.setAppUser(newAppUser);
-    } catch (error) {
-      console.log(error);
-      return error;
-    }
+    await agent.AppUser.create(appUser).then(
+      (result) => {
+        console.log(result);
+        const newAppUser = new AppUser(appUser);
+        this.setAppUser(newAppUser);
+        history.push("/administration");
+      },
+      (error) => {
+        console.log(error);
+        throw error;
+      }
+    );
   };
   updateAppUser = async (appUser: IAppUser) => {
     try {
-      await agent.AppUser.update(appUser);
-      runInAction(() => {
-        if (appUser.id)
-        {
-          let updatedAppUser = { ...this.getAppUser(appUser.id!), ...appUser}
-          
-          const users = this.users.map((user) =>
-            user.id === appUser.id ? { ...user, ...updatedAppUser } : user
-          );
-
-          this.users = users;
+      await agent.AppUser.update(appUser).then(
+        (result) => {
+          console.log(result);
+          runInAction(() => {
+            if (appUser.id) {
+              let updatedAppUser = { ...this.getAppUser(appUser.id!), ...appUser };
+    
+              const users = this.users.map((user) =>
+                user.id === appUser.id ? { ...user, ...updatedAppUser } : user
+              );
+    
+              this.users = users;
+            }
+          });
+        },
+        (error) => {
+          console.log(error);
+          throw error;
         }
-      });
-      
+      );
       
     } catch (error) {
       console.log(error);
@@ -94,14 +104,14 @@ export default class UserStore {
         this.userRegistry = new Map<string, IAppUser>();
         console.log(`this.users cleared `);
         result.forEach((appUser) => {
-        this.setAppUserRegistry(appUser);
-        this.setAppUser(appUser);
-        console.log(`each user : ${appUser}`);
+          this.setAppUserRegistry(appUser);
+          this.setAppUser(appUser);
+          console.log(`each user : ${appUser}`);
+        });
       });
-      });
-      
+
       console.log(`this.users completed`);
-      
+
       this.setLoadingInitial(false);
     } catch (error) {
       console.log(error);

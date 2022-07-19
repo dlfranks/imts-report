@@ -29,6 +29,7 @@ namespace Application.User
         public string RoleName { get; set; }
         public string UserName { get; set; }
         public int MainOfficeId { get; set; }
+        public bool IsNewUser { get; set; }
     }
     public class RegisterDTO
     {

@@ -17,11 +17,13 @@ namespace Application.Core
 
     public class ModelErrorResult<T> : Result<T>
     {
-        public ModelErrorResult()
+        public ModelErrorResult() : base()
         {
             ModelErrors = new Dictionary<string, string>();
         }
         public Dictionary<string, string> ModelErrors { get; set; }
+
+        
     }
 
     public class PagedList<T> : List<T>

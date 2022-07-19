@@ -9,7 +9,6 @@ namespace Application.User
             RuleFor(q => q.FirstName).NotEmpty();
             RuleFor(q => q.LastName).NotEmpty();
             RuleFor(q => q.Email).NotEmpty().EmailAddress();
-            RuleFor(q => q.Password).NotEmpty();
             RuleFor(q => q.RoleName).NotEmpty();
         }
     }

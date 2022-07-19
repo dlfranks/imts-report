@@ -1,6 +1,8 @@
 using API.Extensions;
 using API.Extensions.Filters;
 using API.Middleware;
+using Application.User;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -26,9 +28,12 @@ namespace API
             services.AddControllers(_config =>
             {
                 //_config.Filters.Add(new UserActionFilter());
+            }).AddFluentValidation(ConfigurationBinder =>
+            {
+                ConfigurationBinder.RegisterValidatorsFromAssemblyContaining<Create>();
             });
 
-            
+
             services.ApplicationServices(_config);
             services.AddIdentityServices(_config);
         }
