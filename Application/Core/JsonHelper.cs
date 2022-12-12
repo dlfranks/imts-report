@@ -45,6 +45,10 @@ namespace Application.Core
 
                     //     Do null checks on the values here and skip writing.
                     // }
+                    if(column.ColumnName == "projectNo")
+                    {
+                        var vvv = row[column];
+                    }
 
                     writer.WritePropertyName(column.ColumnName);
                     JsonSerializer.Serialize(writer, columnValue, options);

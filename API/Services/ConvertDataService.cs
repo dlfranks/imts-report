@@ -67,7 +67,7 @@ namespace API.Services
             {
                 var actualRow = table.NewRow();
                 var copyRow = table.NewRow();
-
+                
                 int valueCount = 0;
 
                 for (int i = 0; i < props.Count(); i++)
@@ -96,6 +96,7 @@ namespace API.Services
                                         cloneRow[rProp.Name] = rProp.GetValue(r) ?? DBNull.Value;
                                         valueCount++;
                                     }
+                                    
                                     table.Rows.Add(cloneRow);
 
                                 }

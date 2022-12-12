@@ -1,66 +1,57 @@
 import React, { useEffect } from "react";
 import { Container, Divider, Header } from "semantic-ui-react";
 import { useStore } from "../../app/stores/store";
-import MyTable from '../../app/common/table/MyTable';
+import MyTable from "../../app/common/table/MyTable";
 import { observer } from "mobx-react-lite";
 import DataRequestForm from "./DataRequestForm";
-
-
-
-
-
+import LoadingComponent from "../../app/layout/LoadingComponents";
 
 export default observer(function DataList() {
-    
-    const { concreteStore } = useStore();
-    const { samples, getSamples, sampleReady } = concreteStore;
+  const { concreteStore } = useStore();
+  const { samples, getSamples, sampleReady } = concreteStore;
 
-    const headers  = (data: {}) => {
-        
+  const headers = (data: {}) => {
+    let list: { [key: string]: string } = {};
+    Object.keys(data).map((key) => {
+      list[key.toString()] = key;
+    });
 
-        let list:{[key:string]: string}= {};
-        Object.keys(data).map((key) =>  {
-            list[key.toString()] = key;
-            
-                
-                
-        });
-        
-        console.log(list);
+    console.log(list);
 
-        return list ;
-        
+    return list;
+  };
 
+  useEffect(() => {
+    //if (id) loadActivity(id).then(activity => setActivity(activity!))
+    if (!sampleReady) {
+      getSamples();
     }
-    
-    useEffect(() => {
-        //if (id) loadActivity(id).then(activity => setActivity(activity!))
-        if (!sampleReady) {
-            getSamples();
-        }
+  }, [samples, getSamples, sampleReady]);
 
-    }, [samples, getSamples, sampleReady]);
+  if (!sampleReady)
+    return <LoadingComponent content="Loading concrete data..." />;
 
-    if (!sampleReady) return null;
-    
-    return (
-        <Container style={{ backgroundColor: '#fff', padding: '1em 2em' }}>
-            <Container >
-                <Header as='h3' content='Concrete Data' />
-                <Divider />
-                <Header as='h4' content='Full Dataset' />
-                <MyTable items={ samples.full} headers={headers(samples.full[0])}/>
-                <Header as='h4' content='Mix Number Dataset' />
-                <MyTable items={samples.strength} headers={headers(samples.strength[0])}/>
-                <Header as='h4' content='Strength Dataset' />
-                <MyTable items={samples.mixNumber}  headers={headers(samples.mixNumber[0])}/>
-            </Container>
-            <Container style={{margin:'5em 0'}}>
-                <DataRequestForm />
-                
-            </Container>
-        </Container>
-            
-        
-    );
-})
+  return (
+    <Container style={{ backgroundColor: "#fff", padding: "1em 2em" }}>
+      <Container>
+        <Header as="h3" content="Concrete Data" />
+        <Divider />
+        <Header as="h4" content="Full Dataset" />
+        <MyTable items={samples.full} headers={headers(samples.full[0])} />
+        <Header as="h4" content="Mix Number Dataset" />
+        <MyTable
+          items={samples.strength}
+          headers={headers(samples.strength[0])}
+        />
+        <Header as="h4" content="Strength Dataset" />
+        <MyTable
+          items={samples.mixNumber}
+          headers={headers(samples.mixNumber[0])}
+        />
+      </Container>
+      <Container style={{ margin: "5em 0" }}>
+        <DataRequestForm />
+      </Container>
+    </Container>
+  );
+});

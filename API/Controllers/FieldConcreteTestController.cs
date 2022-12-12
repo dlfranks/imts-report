@@ -49,6 +49,8 @@ namespace API.Controllers
             FieldConcreteDatasetEnum dSet = (FieldConcreteDatasetEnum)dataset;
             string url = _concreteService.getUrl(projectId, dataset);
 
+            
+
             if (dSet == FieldConcreteDatasetEnum.Full)
                 return HandleResult(await _connectionService.concreteDatumData.OnGetData(url));
             else if (dSet == FieldConcreteDatasetEnum.Strength)

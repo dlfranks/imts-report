@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { history } from "../../index";
 import { request } from "http";
 import { IAppUser } from "../models/user";
+import { url } from "inspector";
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
@@ -33,7 +34,7 @@ axios.interceptors.response.use(
     switch (status) {
       case 400:
         if (typeof data === "string") {
-          toast.error(data, {autoClose: false});
+          toast.error(data, { autoClose: false });
         }
         if (config.method === "get" && data.errors.hasOwnProperty("id")) {
           history.push("/not-found");
@@ -45,8 +46,8 @@ axios.interceptors.response.use(
             if (data.errors[key]) {
               modalStateErrors.push(data.errors[key]);
             }
-            }
-            toast.error(modalStateErrors.flat().toString(), {autoClose: false})
+          }
+          toast.error(modalStateErrors.flat().toString(), { autoClose: false });
           throw modalStateErrors.flat();
         }
         if (!data.isSuccess && data.modelErrors) {
@@ -56,16 +57,16 @@ axios.interceptors.response.use(
               modelStateErrors.push(data.modelErrors[key]);
             }
           }
-          toast.error(modelStateErrors.flat().toString(), {autoClose: false});
+          toast.error(modelStateErrors.flat().toString(), { autoClose: false });
 
           throw error.response;
         } else {
-          toast.error(error, {autoClose: false});
+          toast.error(error, { autoClose: false });
         }
 
         break;
       case 401:
-        toast.error("unauthorised", {autoClose: false});
+        toast.error("unauthorised", { autoClose: false });
         break;
       case 404:
         history.push("/not-found");
@@ -95,11 +96,10 @@ const Projects = {
 };
 
 const Concrete = {
-  json: (params: ConcreteParam) => {
-    axios.get(
+  json: (params: ConcreteParam) =>
+    requests.get<any>(
       `/FieldConcreteTest/json?projectId=${params.projectId}&dataset=${params.dataset}&format=${params.format}`
-    );
-  },
+    ),
   samples: () => {
     //requests.get<ConcreteTable[]>(`/FieldConcrteTest/samples`)
     const url = `/FieldConcreteTest/samples`;
@@ -108,6 +108,18 @@ const Concrete = {
   download: (url: string) => {
     axios.get(url);
   },
+  excel: (url : string) => 
+    axios({
+      method: "get",
+      url: url,
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'blob'
+      }
+    }).then(
+      responseBody
+    )
+  
 };
 
 const Account = {
@@ -117,6 +129,7 @@ const Account = {
     requests.post<User>("/account/register", user),
   switchOffice: (officeId: number) =>
     requests.get<User>(`/account/switchoffice?newOfficeId=${officeId}`),
+  token: () => requests.get<User>(`/account/token`)
 };
 
 const AppUser = {

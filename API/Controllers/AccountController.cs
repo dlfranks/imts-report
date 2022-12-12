@@ -62,6 +62,32 @@ namespace API.Controllers
             return BadRequest();
         }
 
+        [API.Middleware.Authorize]
+        [ServiceFilter(typeof(UserActionFilter))]
+        [HttpGet("token")]
+        public async Task<ActionResult<UserDTO>> GetToken()
+        {
+            var currentUserSettings = _userAccessor.GetUserSettings();
+            if (currentUserSettings == null)
+                return Unauthorized("UserSetting Error");
+
+            var user = await _userManager.FindByIdAsync(_userAccessor.GetUserId());
+            if (user == null) return Unauthorized();
+            var appUserOfficeRole = await _unitOfWork.Users.getAppUserOfficeRoleByUserAndOffice(user.Id, _userAccessor.GetOfficeId());
+            if (appUserOfficeRole != null && !string.IsNullOrWhiteSpace(appUserOfficeRole.Role?.RoleName))
+            {
+                var userDto = CreateUserObject(user, user.MainOfficeId, appUserOfficeRole.Role.RoleName);
+                return Ok(new { 
+                    userName = userDto.DisplayName, 
+                    Token = userDto.Token, 
+                    CurrentOffice = currentUserSettings.memberOffices.Where(q => q.id == currentUserSettings.currentOfficeId).FirstOrDefault(),
+                    });
+            }
+
+            return Unauthorized();
+        }
+
+        
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDto)
         {

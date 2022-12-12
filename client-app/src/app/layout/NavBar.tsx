@@ -1,12 +1,15 @@
 //import { Link, NavLink, useLocation, useHistory } from 'react-router-dom';
 import { observer } from "mobx-react-lite";
 import { NavLink, useHistory } from "react-router-dom";
-import { Container, Menu, Image, Dropdown } from "semantic-ui-react";
+import { Container, Menu, Image, Dropdown, Modal } from "semantic-ui-react";
 import { useStore } from "../stores/store";
+import DisplayToken from "../../features/administration/DisplayToken";
+import CommonStore from "../stores/commonStore";
 
 export default observer(function NavBar() {
+  const { modalStore } = useStore();
   const {
-    commonStore: { user, logout, switchOffice },
+    commonStore: { user, logout, switchOffice, generateToken },
   } = useStore();
 
   const history = useHistory();
@@ -28,6 +31,11 @@ export default observer(function NavBar() {
       };
     }
   });
+
+  const getToken = async () => {
+    const token = await generateToken();
+    modalStore.openModal(<DisplayToken token={token} />);
+  };
 
   return (
     <Menu inverted fixed="top">
@@ -51,7 +59,7 @@ export default observer(function NavBar() {
             text={user?.currentOffice?.name}
             onChange={(e, d) => {
               e.preventDefault();
-              const officeId : any = d.value;
+              const officeId: any = d.value;
               if (officeId !== user?.currentOfficeId) switchOffice(officeId);
             }}
           />
@@ -65,10 +73,12 @@ export default observer(function NavBar() {
           <Dropdown pointing="top left" text={`${user?.displayName}`}>
             <Dropdown.Menu>
               <Dropdown.Item
-                to={`/profile/${user?.username}`}
+                as={NavLink}
+                to={`/administration/${user?.id}`}
                 text="My Profile"
                 icon="user"
               />
+              <Dropdown.Item onClick={getToken} text="Token" icon="key" />
               <Dropdown.Item onClick={logout} text="Logout" icon="power" />
             </Dropdown.Menu>
           </Dropdown>

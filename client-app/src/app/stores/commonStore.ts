@@ -1,9 +1,13 @@
+import React from "react";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { ServerError } from "../models/serverError";
 import { User, UserFormValues } from "../models/user";
 import { store } from "./store";
 import { history } from "../..";
 import agent from "../api/agent";
+import modalStore from "../stores/modalStore";
+import { IDValuePair } from "../models/coreInterface";
+import DisplayToken from "../../features/administration/DisplayToken";
 
 export default class CommonStore {
   error: ServerError | null = null;
@@ -29,14 +33,18 @@ export default class CommonStore {
     return !!this.user;
   }
 
+  generateToken = async () => {
+    const user = await agent.Account.token();
+    return user.token;
+  };
+
   login = async (creds: UserFormValues) => {
     try {
       const user = await agent.Account.login(creds);
       this.setToken(user.token);
-      
+
       store.modalStore.closeModal();
       this.getUserFromServer();
-      
     } catch (error) {
       throw error;
     }
@@ -60,7 +68,8 @@ export default class CommonStore {
   };
   getUser = (): User | null => {
     return this.user;
-  }
+  };
+  
   switchOffice = async (officeId: number) => {
     try {
       const user = await agent.Account.switchOffice(officeId);
